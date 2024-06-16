@@ -163,7 +163,7 @@ public struct CountedSet<Element>: Sendable, Equatable where Element: (Hashable 
     }
 
     public func mostFrequent() -> Element? {
-        if let max = contents.values.lazy.filter { $0 > 1 }.max() {
+        if let max = contents.values.lazy.filter({ $0 > 1 }).max() {
             return contents.first { $0.value == max }?.key
         }
         return nil

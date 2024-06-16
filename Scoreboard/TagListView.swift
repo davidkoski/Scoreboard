@@ -45,11 +45,7 @@ struct TagListView : View {
                             display(symbol: tag.symbol)
                                 .frame(maxWidth: 40)
                             Text(tag.tag)
-                        }
-                            .navigationDestination(for: Tag.self, destination: { tag in
-                                TableListView(restrict: tag.tables)
-                            })
-                        
+                        }                        
                     }
                 }
                 .onDelete(perform: { indexes in

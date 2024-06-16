@@ -11,7 +11,6 @@ import SwiftData
 
 struct RecentScoresView : View {
     
-    @Binding var selected: SearchItem?
     @EnvironmentObject var pinballDB: PinballDB
 
     @Environment(\.modelContext) private var modelContext
@@ -21,9 +20,7 @@ struct RecentScoresView : View {
 
     @State private var sortOrder = [KeyPathComparator(\Score.date, order: .reverse)]
     
-    init(selected: Binding<SearchItem?>) {
-        self._selected = selected
-        
+    init() {
         let recent = Date() - 2 * 3600 * 24
         self._scores = Query(
             filter: #Predicate<Score> {
@@ -34,10 +31,7 @@ struct RecentScoresView : View {
     var body: some View {
         SwiftUI.Table(scores.sorted(using: sortOrder), sortOrder: $sortOrder) {
             TableColumn("Table") { score in
-                HStack {
-                    Button(action: { select(score) }) {
-                        Image(systemName: "arrow.forward")
-                    }
+                NavigationLink(value: score.table) {
                     Text(score.table?.name ?? "-")
                 }
             }
@@ -53,15 +47,5 @@ struct RecentScoresView : View {
                 Text(score.date.formatted())
             }
         }
-    }
-    
-    private func select(_ score: Score) {
-        if let table = score.table {
-            Task {
-                if let entry = try await pinballDB.find(id: table.id) {
-                    selected = SearchItem(table: table, entry: entry)
-                }
-            }
-        }
-    }
+    }    
 }

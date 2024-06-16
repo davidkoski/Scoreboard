@@ -9,8 +9,56 @@ import Foundation
 import SwiftUI
 import SwiftData
 
+struct CurrentTableDetailView: View {
+    
+    @Environment(\.modelContext) private var modelContext
+
+    @State var table: Table?
+    
+    var body: some View {
+        Group {
+            if let table {
+                TableDetailView(table: table)
+            } else {
+                ProgressView()
+            }
+        }
+        .task {
+            await selectCurrent()
+        }
+    }
+    
+    private func selectCurrent() async {
+        do {
+            guard let current = try await PinupPopper().currentTable() else {
+                print("Unable to get current from PinupPopper")
+                return
+            }
+            let id = current.id
+            
+            let tables = try modelContext.fetch(FetchDescriptor<Table>(predicate: #Predicate<Table> {
+                $0.id == id
+            }))
+            
+            if let table = tables.first {
+                self.table = table
+                
+                // backfill missing popperId
+                if table.popperId == nil {
+                    table.popperId = current.gameID
+                }
+                
+            } else {
+                self.table = Table(id: current.id, name: current.name, popperId: current.gameID)
+            }
+            
+        } catch {
+            print("Unable to get current: \(error)")
+        }
+    }
+}
+
 struct TableDetailView : View {
-    let entry: PinballDB.Entry
     let table: Table
     
     @State var showScore = false
@@ -19,7 +67,7 @@ struct TableDetailView : View {
     
     @Environment(\.modelContext) private var modelContext
     
-//    @Query var allTags: [Tag]
+    @Query var allTags: [Tag]
 
     @State private var sortOrder = [KeyPathComparator(\Score.score, order: .reverse)]
     @State private var confirmationShown = false
@@ -56,7 +104,7 @@ struct TableDetailView : View {
                 VStack {
                     HStack {
                         Spacer()
-                        Text(entry.title)
+                        Text(table.name)
                             .font(.headline)
                         Spacer()
                     }
@@ -80,39 +128,39 @@ struct TableDetailView : View {
                         .padding()
                         .disabled(showScore)
                         
-//                        HStack {
-//                            ForEach(allTags.sorted(), id: \.tag) { tag in
-//                                let selected = table.tags.contains(tag)
-//                                #if os(iOS)
-//                                let background = Color(white: 0.1)
-//                                #else
-//                                let background = Color(white: 0.9)
-//                                #endif
-//                                display(tag: tag)
-//                                    .foregroundStyle(.black)
-//                                    .padding()
-//                                    .background {
-//                                        RoundedRectangle(cornerRadius: 8)
-//                                            .foregroundColor(selected ? .white : background)
-//                                        Circle()
-//                                            .foregroundStyle(selected ? .white : Color(white: 0.8))
-//                                            .padding(6)
-//                                    }
-//                                    .onTapGesture {
-//                                        if table.tags.contains(tag) {
-//                                            table.tags.removeAll { $0 == tag }
-//                                        } else {
-//                                            table.tags.append(tag)
-//                                        }
-//                                        try? modelContext.save()
-//                                    }
-//                                    .help(tag.tag)
-//                            }
-//                        }
-//                        #if os(iOS)
-//                        .font(.system(size: 32))
-//                        #else
-//                        #endif
+                        HStack {
+                            ForEach(allTags.sorted(), id: \.tag) { tag in
+                                let selected = table.tags.contains(tag)
+                                #if os(iOS)
+                                let background = Color(white: 0.1)
+                                #else
+                                let background = Color(white: 0.9)
+                                #endif
+                                display(tag: tag)
+                                    .foregroundStyle(.black)
+                                    .padding()
+                                    .background {
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .foregroundColor(selected ? .white : background)
+                                        Circle()
+                                            .foregroundStyle(selected ? .white : Color(white: 0.8))
+                                            .padding(6)
+                                    }
+                                    .onTapGesture {
+                                        if table.tags.contains(tag) {
+                                            table.tags.removeAll { $0 == tag }
+                                        } else {
+                                            table.tags.append(tag)
+                                        }
+                                        try? modelContext.save()
+                                    }
+                                    .help(tag.tag)
+                            }
+                        }
+                        #if os(iOS)
+                        .font(.system(size: 32))
+                        #else
+                        #endif
                     }
                 }
             }
@@ -167,13 +215,8 @@ struct TableDetailView : View {
     
     private func delete(score: Score) {
         withAnimation {
-            do {
-                table.scores.removeAll { $0 == score }
-                modelContext.delete(score)
-                try modelContext.save()
-            } catch {
-                print("failed to delete score: \(error)")
-            }
+            table.scores.removeAll { $0 == score }
+            modelContext.delete(score)
         }
     }
 
@@ -198,22 +241,17 @@ struct TableDetailView : View {
         self.showCamera = false
     }
     
-    private func saveScore(_ score: Score) throws {
+    private func saveScore(_ score: Score) {
         if table.modelContext == nil {
             modelContext.insert(table)
         }
         table.scores.append(score)
-        try modelContext.save()
     }
     
     private func saveScore() {
         withAnimation {
-            do {
-                if let score {
-                    try saveScore(score)
-                }
-            } catch {
-                print("Unable to save score: \(error)")
+            if let score {
+                saveScore(score)
             }
             stopScore()
         }
@@ -242,12 +280,8 @@ struct TableDetailView : View {
             if let best = myScores.last {
                 if !table.scores.contains(where: { $0.score == best.numericScore }) {
                     withAnimation {
-                        do {
-                            try saveScore(.init(person: "DAK", score: best.numericScore))
-                        } catch {
-                            print("Unable to save score: \(error)")
-                        }
-                        
+                        saveScore(.init(person: "DAK", score: best.numericScore))
+
                         // how do we get swiftui to notice the change
                         // in table.scores relationship?  here I touch
                         // the sortOrder as a workaround to force it

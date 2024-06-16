@@ -10,7 +10,7 @@ import SwiftData
 import SwiftUI
 
 @Model
-final class Table : Equatable, Identifiable {
+final class Table : Equatable, Identifiable, Comparable {
     @Attribute(.unique)
     var id: String
     
@@ -28,11 +28,23 @@ final class Table : Equatable, Identifiable {
         self.init(id: entry.id, name: entry.name)
     }
 
-    internal init(id: String, name: String) {
+    internal init(id: String, name: String, popperId: String? = nil) {
         self.id = id
         self.name = name
+        self.popperId = popperId
         self.scores = []
         self.tags = []
+    }
+    
+    var sortKey: String {
+        name
+            .lowercased()
+            .replacingOccurrences(of: "the ", with: "")
+            .replacingOccurrences(of: "jp's ", with: "")
+    }
+    
+    static func < (lhs: Table, rhs: Table) -> Bool {
+        lhs.sortKey < rhs.sortKey
     }
 }
 

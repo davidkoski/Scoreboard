@@ -17,7 +17,7 @@
 		C36981412C1E3BBA00B4A704 /* TagListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36981402C1E3BBA00B4A704 /* TagListView.swift */; };
 		C36981432C1E4C2900B4A704 /* ScoreEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36981422C1E4C2900B4A704 /* ScoreEntry.swift */; };
 		C3D0AABD2C05593F00B8BD73 /* ScoreboardApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D0AABC2C05593F00B8BD73 /* ScoreboardApp.swift */; };
-		C3D0AABF2C05593F00B8BD73 /* TableListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D0AABE2C05593F00B8BD73 /* TableListView.swift */; };
+		C3D0AABF2C05593F00B8BD73 /* TableSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D0AABE2C05593F00B8BD73 /* TableSearchView.swift */; };
 		C3D0AAC32C05594000B8BD73 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C3D0AAC22C05594000B8BD73 /* Assets.xcassets */; };
 		C3D0AAC72C05594000B8BD73 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C3D0AAC62C05594000B8BD73 /* Preview Assets.xcassets */; };
 		C3D0AACF2C055A6900B8BD73 /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D0AACE2C055A6900B8BD73 /* Camera.swift */; };
@@ -51,7 +51,7 @@
 		C36981422C1E4C2900B4A704 /* ScoreEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreEntry.swift; sourceTree = "<group>"; };
 		C3D0AAB92C05593F00B8BD73 /* Scoreboard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Scoreboard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3D0AABC2C05593F00B8BD73 /* ScoreboardApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreboardApp.swift; sourceTree = "<group>"; };
-		C3D0AABE2C05593F00B8BD73 /* TableListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableListView.swift; sourceTree = "<group>"; };
+		C3D0AABE2C05593F00B8BD73 /* TableSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableSearchView.swift; sourceTree = "<group>"; };
 		C3D0AAC22C05594000B8BD73 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C3D0AAC42C05594000B8BD73 /* Scoreboard.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Scoreboard.entitlements; sourceTree = "<group>"; };
 		C3D0AAC62C05594000B8BD73 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -146,7 +146,7 @@
 				C3D0AABC2C05593F00B8BD73 /* ScoreboardApp.swift */,
 				C3D0AAE92C06AFBB00B8BD73 /* TableDetailView.swift */,
 				C36981422C1E4C2900B4A704 /* ScoreEntry.swift */,
-				C3D0AABE2C05593F00B8BD73 /* TableListView.swift */,
+				C3D0AABE2C05593F00B8BD73 /* TableSearchView.swift */,
 				C36981402C1E3BBA00B4A704 /* TagListView.swift */,
 				C369813B2C15497000B4A704 /* VPinStudio.swift */,
 				C3D0AAC22C05594000B8BD73 /* Assets.xcassets */,
@@ -309,7 +309,7 @@
 				C3D0AAE42C057E0500B8BD73 /* PinballDB.swift in Sources */,
 				C3D0AACF2C055A6900B8BD73 /* Camera.swift in Sources */,
 				C36981412C1E3BBA00B4A704 /* TagListView.swift in Sources */,
-				C3D0AABF2C05593F00B8BD73 /* TableListView.swift in Sources */,
+				C3D0AABF2C05593F00B8BD73 /* TableSearchView.swift in Sources */,
 				C369813C2C15497000B4A704 /* VPinStudio.swift in Sources */,
 				C3D0AADE2C05783700B8BD73 /* Migration.swift in Sources */,
 				C3D0AAE22C057C4300B8BD73 /* PinupPopper.swift in Sources */,
