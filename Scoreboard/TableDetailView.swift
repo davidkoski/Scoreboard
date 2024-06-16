@@ -246,6 +246,11 @@ struct TableDetailView : View {
             modelContext.insert(table)
         }
         table.scores.append(score)
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed saving score: \(error)")
+        }
     }
     
     private func saveScore() {

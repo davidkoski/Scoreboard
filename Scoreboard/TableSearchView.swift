@@ -44,8 +44,9 @@ struct TableSearchView: View {
         .onChange(of: search, { oldValue, newValue in
             performSearch(newValue)
         })
-        .task {
+        .onAppear {
             self.items = tables
+            performSearch(search)
         }
     }
         
@@ -56,11 +57,15 @@ struct TableSearchView: View {
     }
         
     private func performSearch(_ search: String) {
-        let terms = search.lowercased()
-        self.items = tables
-            .filter { table in
-                table.name.lowercased().contains(terms)
-            }
+        if search.isEmpty {
+            self.items = tables
+        } else {
+            let terms = search.lowercased()
+            self.items = tables
+                .filter { table in
+                    table.name.lowercased().contains(terms)
+                }
+        }
     }
 
 }

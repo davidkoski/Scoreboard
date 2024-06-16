@@ -16,18 +16,11 @@ extension UTType {
 @main
 struct ScoreboardApp: App {
     
-    @State var pinballDB = PinballDB()
-    
     var body: some Scene {
         DocumentGroup(
             editing: .scoreboards,
             migrationPlan: ScoreboardCardsMigrationPlan.self) {
-            ContentView()
-                .environmentObject(pinballDB)
+                ContentView()
             }
-        
-        WindowGroup {
-            ContentView()
-        }
     }
 }

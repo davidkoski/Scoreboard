@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import SwiftData
 
 struct ContentView : View {
     
@@ -29,6 +30,8 @@ struct ContentView : View {
                     TableSearchView()
                 case "Tags":
                     TagListView()
+                case "Current":
+                    CurrentTableDetailView()
                 default:
                     EmptyView()
                 }
@@ -41,16 +44,43 @@ struct ContentView : View {
             }
         }
         .toolbar {
-            NavigationLink {
-                CurrentTableDetailView()
-            } label: {
+            Button(action: selectCurrent) {
                 Text("Current")
             }
-
         }
         .onAppear() {
             modelContext.autosaveEnabled = true
             path.append("Recent")
+        }
+    }
+    
+    private func selectCurrent() {
+        Task {
+            do {
+                guard let current = try await PinupPopper().currentTable() else {
+                    print("Unable to get current from PinupPopper")
+                    return
+                }
+                let id = current.id
+                
+                let tables = try modelContext.fetch(FetchDescriptor<Table>(predicate: #Predicate<Table> {
+                    $0.id == id
+                }))
+                
+                let table = tables.first ?? Table(id: current.id, name: current.name, popperId: current.gameID)
+                
+                // backfill missing popperId
+                if table.popperId == nil {
+                    table.popperId = current.gameID
+                }
+                
+                if path.isEmpty {
+                    path.removeLast()
+                }
+                path.append(table)
+            } catch {
+                print("Unable to get current: \(error)")
+            }
         }
     }
 }

@@ -11,8 +11,6 @@ import SwiftData
 
 struct RecentScoresView : View {
     
-    @EnvironmentObject var pinballDB: PinballDB
-
     @Environment(\.modelContext) private var modelContext
     
     @Query
