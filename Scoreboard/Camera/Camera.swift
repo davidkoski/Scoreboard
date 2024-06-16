@@ -77,9 +77,9 @@ public class CameraController: NSObject, AVCaptureVideoDataOutputSampleBufferDel
     private func setOrientation(_ orientation: UIDeviceOrientation) {
         let angle: Double?
         switch orientation {
-        case .unknown, .faceDown:
+        case .unknown, .faceDown, .faceUp:
             angle = nil
-        case .portrait, .faceUp:
+        case .portrait:
             angle = 90
         case .portraitUpsideDown:
             angle = 270

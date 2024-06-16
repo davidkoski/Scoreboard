@@ -34,10 +34,6 @@ final class Table : Equatable, Identifiable {
         self.scores = []
         self.tags = []
     }
-    
-    static func ==(lhs: Table, rhs: Table) -> Bool {
-        lhs.id == rhs.id
-    }
 }
 
 @Model
@@ -57,22 +53,38 @@ final class Score {
 }
 
 @Model
-final class Tag {
-    
+final class Tag : Comparable {
     @Attribute(.unique)
     var tag: String
     
     var symbol: String?
     
+    var sortOrder: Int
+    
     @Relationship
     var tables: [Table]
 
-    internal init(tag: String, symbol: String? = nil, tables: [Table] = []) {
+    internal init(tag: String, symbol: String? = nil, sortOrder: Int = 0, tables: [Table] = []) {
         self.tag = tag
         self.symbol = symbol
+        self.sortOrder = sortOrder
         self.tables = tables
     }
+    
+    static func < (lhs: Tag, rhs: Tag) -> Bool {
+        lhs.sortOrder < rhs.sortOrder
+    }
 }
+
+@ViewBuilder
+func display(tag: Tag) -> some View {
+    if let symbol = tag.symbol, !symbol.isEmpty {
+        display(symbol: symbol)
+    } else {
+        Text(tag.tag)
+    }
+}
+
 
 func display(symbol: String?) -> some View {
     Group {

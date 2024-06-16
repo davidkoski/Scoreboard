@@ -12,6 +12,8 @@ struct ContentView : View {
     
     @State var path = NavigationPath()
     
+    @Environment(\.modelContext) private var modelContext
+
     var body: some View {
         NavigationStack(path: $path) {
             List {
@@ -30,6 +32,7 @@ struct ContentView : View {
             }
         }
         .onAppear() {
+            modelContext.autosaveEnabled = true
             path.append("Tables")
         }
     }

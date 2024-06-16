@@ -13,7 +13,7 @@ struct TagListView : View {
     
     @Environment(\.modelContext) private var modelContext
 
-    @Query var tags: [Tag]
+    @Query(sort: [SortDescriptor(\Tag.sortOrder)]) var tags: [Tag]
     
     @State private var confirmationShown = false
 
@@ -37,29 +37,40 @@ struct TagListView : View {
                 }
             }
             .padding(3)
-            
-            SwiftUI.Table(tags) {
-                TableColumn("Tag") { tag in
-                    Text(tag.tag)
-                }
-                TableColumn("Symbol") { tag in
-                    display(symbol: tag.symbol)
-                }
-                
-                TableColumn("") { tag in
-                    Button(role: .destructive, action: { confirmationShown = true }) {
-                        Image(systemName: "trash")
-                    }
-                    .confirmationDialog(
-                        "Are you sure?",
-                        isPresented: $confirmationShown
-                    ) {
-                        Button("Yes") {
-                            delete(tag)
+                        
+            List {
+                ForEach(tags, id: \.tag) { tag in
+                    HStack {
+                        NavigationLink(value: tag) {
+                            display(symbol: tag.symbol)
+                                .frame(maxWidth: 40)
+                            Text(tag.tag)
                         }
+                            .navigationDestination(for: Tag.self, destination: { tag in
+                                TableListView(restrict: tag.tables)
+                            })
+                        
                     }
                 }
-                .width(min: 30, max: 30)
+                .onDelete(perform: { indexes in
+                    tags
+                        .enumerated()
+                        .filter {
+                            indexes.contains($0.0)
+                        }
+                        .forEach { (_, tag) in
+                            modelContext.delete(tag)
+                        }
+                    try! modelContext.save()
+                })
+                .onMove { indexes, position in
+                    var tags = self.tags
+                    tags.move(fromOffsets: indexes, toOffset: position)
+                    for (index, tag) in tags.enumerated() {
+                        tag.sortOrder = index
+                    }
+                    try? modelContext.save()
+                }
             }
         }
     }
@@ -73,5 +84,8 @@ struct TagListView : View {
         let tag = Tag(tag: tag, symbol: symbol.isEmpty ? nil : symbol)
         modelContext.insert(tag)
         try! modelContext.save()
+        
+        self.tag = ""
+        self.symbol = ""
     }
 }

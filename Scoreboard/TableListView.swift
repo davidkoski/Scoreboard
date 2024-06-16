@@ -28,9 +28,27 @@ struct SearchItem : Identifiable, Hashable, Comparable {
     }
 }
 
+func tablesToItems(_ tables: [Table], pinballDB: PinballDB) async throws -> [SearchItem] {
+    try? await pinballDB.load()
+    return await Array(
+        tables
+            .async
+            .compactMap {
+                if let entry = try? await pinballDB.find(id: $0.id) {
+                    return SearchItem(table: $0, entry: entry)
+                } else {
+                    return nil
+                }
+            }
+        )
+        .sorted()
+}
+
 struct TableListView: View {
     @Environment(\.modelContext) private var modelContext
+    
     @Query private var tables: [Table]
+    var restrict: [Table]?
     
     @State var search = ""
     @State var items = [SearchItem]()
@@ -42,8 +60,6 @@ struct TableListView: View {
         case staleSearch(String)
     }
     @State var searchState = SearchState.idle
-    
-    @State var show = Show.table
     
     @EnvironmentObject var pinballDB: PinballDB
     
@@ -61,9 +77,10 @@ struct TableListView: View {
                 .frame(minWidth: 200)
             } detail: {
                 if let selected {
-                    TableDetailView(entry: selected.entry, table: selected.table, show: $show)
+                    TableDetailView(entry: selected.entry, table: selected.table)
                         .padding()
-                } else {
+                    
+                } else if restrict == nil {
                     RecentScoresView(selected: $selected)
                 }
             }
@@ -81,18 +98,7 @@ struct TableListView: View {
             performSearch(newValue)
         })
         .task {
-            try? await pinballDB.load()
-            items = await Array(tables
-                .async
-                .compactMap {
-                    if let entry = try? await pinballDB.find(id: $0.id) {
-                        return SearchItem(table: $0, entry: entry)
-                    } else {
-                        return nil
-                    }
-                }
-            )
-            .sorted()
+            self.items = (try? await tablesToItems(restrict ?? tables, pinballDB: pinballDB)) ?? []
         }
     }
     

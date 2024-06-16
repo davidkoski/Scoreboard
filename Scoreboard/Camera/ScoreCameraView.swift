@@ -123,7 +123,6 @@ public struct ScoreCameraView : View {
         
     public var body: some View {
         HStack {
-            Text("\(String(describing: state))")
             if let image {
                 switch state {
                 case .running, .pause, .zoomLive:

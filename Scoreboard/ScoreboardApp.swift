@@ -24,8 +24,8 @@ struct ScoreboardApp: App {
             migrationPlan: ScoreboardCardsMigrationPlan.self) {
             ContentView()
                 .environmentObject(pinballDB)
-        }
-
+            }
+        
         WindowGroup {
             ContentView()
         }

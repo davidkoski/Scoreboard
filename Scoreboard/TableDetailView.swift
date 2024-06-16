@@ -7,11 +7,7 @@
 
 import Foundation
 import SwiftUI
-
-enum Show {
-    case table
-    case topper
-}
+import SwiftData
 
 struct TableDetailView : View {
     let entry: PinballDB.Entry
@@ -22,17 +18,17 @@ struct TableDetailView : View {
     @State var score: Score?
     
     @Environment(\.modelContext) private var modelContext
+    
+//    @Query var allTags: [Tag]
 
     @State private var sortOrder = [KeyPathComparator(\Score.score, order: .reverse)]
     @State private var confirmationShown = false
-    
-    @Binding var show: Show
-    
-    var showScoreTable: Bool {
+        
+    var hideWhileEditing: Bool {
         #if os(iOS)
-        !showScore
+        showScore
         #else
-        true
+        false
         #endif
     }
     
@@ -47,11 +43,11 @@ struct TableDetailView : View {
     var body: some View {
         VStack {
             HStack {
-                if let popperId = table.popperId {
+                if !hideWhileEditing, let popperId = table.popperId {
                     AsyncImage(url: VPinStudio().wheelImageURL(id: popperId)) { image in
                         image
                             .resizable()
-                            .frame(maxWidth: 64, maxHeight: 64)
+                            .frame(maxWidth: 144, maxHeight: 144)
                     } placeholder: {
                         EmptyView()
                     }
@@ -65,23 +61,59 @@ struct TableDetailView : View {
                         Spacer()
                     }
                     
-                    HStack {
-                        Button(action: createNewScoreFromCamera) {
-                            Image(systemName: "camera")
+                    if !hideWhileEditing {
+                        HStack {
+                            Button(action: createNewScoreFromCamera) {
+                                Image(systemName: "camera")
+                            }
+                            
+                            Button(action: createNewScoreFromKeyboard) {
+                                Image(systemName: "keyboard")
+                            }
+                            
+                            Button(action: downloadScores) {
+                                Image(systemName: "square.and.arrow.down")
+                            }
+                            .disabled(table.popperId == nil)
                         }
+                        .buttonStyle(.plain)
+                        .padding()
+                        .disabled(showScore)
                         
-                        Button(action: createNewScoreFromKeyboard) {
-                            Image(systemName: "keyboard")
-                        }
-
-                        Button(action: downloadScores) {
-                            Image(systemName: "square.and.arrow.down")
-                        }
-                        .disabled(table.popperId == nil)
+//                        HStack {
+//                            ForEach(allTags.sorted(), id: \.tag) { tag in
+//                                let selected = table.tags.contains(tag)
+//                                #if os(iOS)
+//                                let background = Color(white: 0.1)
+//                                #else
+//                                let background = Color(white: 0.9)
+//                                #endif
+//                                display(tag: tag)
+//                                    .foregroundStyle(.black)
+//                                    .padding()
+//                                    .background {
+//                                        RoundedRectangle(cornerRadius: 8)
+//                                            .foregroundColor(selected ? .white : background)
+//                                        Circle()
+//                                            .foregroundStyle(selected ? .white : Color(white: 0.8))
+//                                            .padding(6)
+//                                    }
+//                                    .onTapGesture {
+//                                        if table.tags.contains(tag) {
+//                                            table.tags.removeAll { $0 == tag }
+//                                        } else {
+//                                            table.tags.append(tag)
+//                                        }
+//                                        try? modelContext.save()
+//                                    }
+//                                    .help(tag.tag)
+//                            }
+//                        }
+//                        #if os(iOS)
+//                        .font(.system(size: 32))
+//                        #else
+//                        #endif
                     }
-                    .buttonStyle(.plain)
-                    .padding()
-                    .disabled(showScore)
                 }
             }
                         
@@ -100,7 +132,7 @@ struct TableDetailView : View {
                 }
                 #endif
 
-                if showScoreTable {
+                if !hideWhileEditing {
                     let scores = table.scores.sorted(using: sortOrder)
                     
                     SwiftUI.Table(scores, sortOrder: $sortOrder) {
@@ -231,121 +263,3 @@ struct TableDetailView : View {
     }
 }
 
-struct ScoreEntry : View {
-    
-    @Binding var score: Score
-    
-    let save: () -> Void
-    let cancel: () -> Void
-    
-    @FocusState private var scoreIsFocused: Bool
-
-    var body: some View {
-        HStack {
-            TextField("initials", text: $score.person)
-            
-            #if os(iOS)
-            TextField("score", value: $score.score, format: .number)
-                .focused($scoreIsFocused)
-                .keyboardType(.decimalPad)
-                .onSubmit {
-                    save()
-                }
-            #else
-            TextField("score", value: $score.score, format: .number)
-                .focused($scoreIsFocused)
-                .onSubmit {
-                    scoreIsFocused = false
-                    save()
-                }
-            #endif
-            
-            Button("Save", action: {
-                scoreIsFocused = false
-                save()
-            })
-            Button("Cancel", action: {
-                scoreIsFocused = false
-                cancel()
-            })
-        }
-        .onAppear {
-            #if os(iOS)
-            #else
-            scoreIsFocused = true
-            #endif
-        }
-    }
-    
-}
-
-struct ScoreKeypad : View {
-    
-    @Binding var score: Score
-    
-    struct Digit : View {
-        @Binding var score: Score
-        
-        let value: Int
-
-        var body: some View {
-            Button(action: add) {
-                Text("\(value)")
-            }
-        }
-        
-        func add() {
-            score.score = score.score * 10 + value
-        }
-    }
-    
-    var body: some View {
-        VStack(spacing: 20) {
-            HStack(spacing: 20) {
-                Digit(score: $score, value: 1)
-                Digit(score: $score, value: 2)
-                Digit(score: $score, value: 3)
-            }
-            HStack(spacing: 20) {
-                Digit(score: $score, value: 4)
-                Digit(score: $score, value: 5)
-                Digit(score: $score, value: 6)
-            }
-            HStack(spacing: 20) {
-                Digit(score: $score, value: 7)
-                Digit(score: $score, value: 8)
-                Digit(score: $score, value: 9)
-            }
-            HStack(spacing: 20) {
-                Button(action: reset) {
-                    Image(systemName: "xmark.circle")
-                }
-                .buttonStyle(.plain)
-                
-                Digit(score: $score, value: 0)
-                
-                Button(action: backspace) {
-                    Image(systemName: "delete.backward")
-                }
-                .buttonStyle(.plain)
-
-            }
-        }
-        .fontDesign(.monospaced)
-        .bold()
-        .font(.system(size: 40))
-        .buttonStyle(.bordered)
-    }
-    
-    func reset() {
-        score.score = 0
-    }
-    
-    func backspace() {
-        score.score = score.score / 10
-    }
-}
-
-#Preview {
-    ScoreKeypad(score: .constant(.init(person: "DAK", score: 1234)))
-}
