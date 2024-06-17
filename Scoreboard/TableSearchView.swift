@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct TableListView : View {
     
@@ -24,16 +23,15 @@ struct TableListView : View {
 }
 
 struct TableSearchView: View {
-    @Environment(\.modelContext) private var modelContext
     
-    @Query private var tables: [Table]
+    let document: ScoreboardDocument
     
     @State var search = ""
     @State var items = [Table]()
     
     var body: some View {
         VStack {
-            TableListView(tables: items.sorted())
+            TableListView(tables: items)
         }
         .toolbar {
             Button(action: applySearch) {
@@ -45,7 +43,7 @@ struct TableSearchView: View {
             performSearch(newValue)
         })
         .onAppear {
-            self.items = tables
+            self.items = document.contents.tables.values.sorted()
             performSearch(search)
         }
     }
@@ -58,13 +56,14 @@ struct TableSearchView: View {
         
     private func performSearch(_ search: String) {
         if search.isEmpty {
-            self.items = tables
+            self.items = document.contents.tables.values.sorted()
         } else {
             let terms = search.lowercased()
-            self.items = tables
+            self.items = document.contents.tables.values
                 .filter { table in
                     table.name.lowercased().contains(terms)
                 }
+                .sorted()
         }
     }
 

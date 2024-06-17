@@ -6,21 +6,13 @@
 //
 
 import SwiftUI
-import SwiftData
-import UniformTypeIdentifiers
-
-extension UTType {
-    static var scoreboards = UTType(exportedAs: "com.koski.scoreboards")
-}
 
 @main
 struct ScoreboardApp: App {
     
     var body: some Scene {
-        DocumentGroup(
-            editing: .scoreboards,
-            migrationPlan: ScoreboardCardsMigrationPlan.self) {
-                ContentView()
-            }
+        DocumentGroup(newDocument: ScoreboardDocument(), editor: { configuration in
+            ContentView(document: configuration.$document)
+        })
     }
 }

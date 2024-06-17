@@ -7,68 +7,16 @@
 
 import Foundation
 import SwiftUI
-import SwiftData
-
-struct CurrentTableDetailView: View {
-    
-    @Environment(\.modelContext) private var modelContext
-
-    @State var table: Table?
-    
-    var body: some View {
-        Group {
-            if let table {
-                TableDetailView(table: table)
-            } else {
-                ProgressView()
-            }
-        }
-        .task {
-            await selectCurrent()
-        }
-    }
-    
-    private func selectCurrent() async {
-        do {
-            guard let current = try await PinupPopper().currentTable() else {
-                print("Unable to get current from PinupPopper")
-                return
-            }
-            let id = current.id
-            
-            let tables = try modelContext.fetch(FetchDescriptor<Table>(predicate: #Predicate<Table> {
-                $0.id == id
-            }))
-            
-            if let table = tables.first {
-                self.table = table
-                
-                // backfill missing popperId
-                if table.popperId == nil {
-                    table.popperId = current.gameID
-                }
-                
-            } else {
-                self.table = Table(id: current.id, name: current.name, popperId: current.gameID)
-            }
-            
-        } catch {
-            print("Unable to get current: \(error)")
-        }
-    }
-}
 
 struct TableDetailView : View {
-    let table: Table
+    
+    @Binding var table: Table
+    let tags: [Tag]
     
     @State var showScore = false
     @State var showCamera = false
     @State var score: Score?
     
-    @Environment(\.modelContext) private var modelContext
-    
-    @Query var allTags: [Tag]
-
     @State private var sortOrder = [KeyPathComparator(\Score.score, order: .reverse)]
     @State private var confirmationShown = false
         
@@ -82,7 +30,7 @@ struct TableDetailView : View {
     
     var scoreBinding: Binding<Score> {
         Binding {
-            score ?? .init(person: "DAK", score: 0)
+            score ?? .init(initials: "DAK", score: 0, date: Date())
         } set: { newValue in
             self.score = newValue
         }
@@ -129,13 +77,15 @@ struct TableDetailView : View {
                         .disabled(showScore)
                         
                         HStack {
-                            ForEach(allTags.sorted(), id: \.tag) { tag in
-                                let selected = table.tags.contains(tag)
+                            ForEach(tags) { tag in
+                                let selected = table.tags.contains(tag.tag)
+                                
                                 #if os(iOS)
                                 let background = Color(white: 0.1)
                                 #else
                                 let background = Color(white: 0.9)
                                 #endif
+                                
                                 display(tag: tag)
                                     .foregroundStyle(.black)
                                     .padding()
@@ -147,12 +97,11 @@ struct TableDetailView : View {
                                             .padding(6)
                                     }
                                     .onTapGesture {
-                                        if table.tags.contains(tag) {
-                                            table.tags.removeAll { $0 == tag }
+                                        if table.tags.contains(tag.tag) {
+                                            table.tags.remove(tag.tag)
                                         } else {
-                                            table.tags.append(tag)
+                                            table.tags.insert(tag.tag)
                                         }
-                                        try? modelContext.save()
                                     }
                                     .help(tag.tag)
                             }
@@ -184,7 +133,7 @@ struct TableDetailView : View {
                     let scores = table.scores.sorted(using: sortOrder)
                     
                     SwiftUI.Table(scores, sortOrder: $sortOrder) {
-                        TableColumn("Name", value: \.person)
+                        TableColumn("Initials", value: \.initials)
                             .width(min: 50, max: 50)
                         
                         TableColumn("Score", value: \.score) { score in
@@ -216,13 +165,12 @@ struct TableDetailView : View {
     private func delete(score: Score) {
         withAnimation {
             table.scores.removeAll { $0 == score }
-            modelContext.delete(score)
         }
     }
 
     private func createNewScoreFromCamera() {
         withAnimation {
-            score = Score(person: "DAK", score: 0)
+            score = Score(initials: "DAK", score: 0)
             self.showScore = true
             self.showCamera = true
         }
@@ -230,7 +178,7 @@ struct TableDetailView : View {
     
     private func createNewScoreFromKeyboard() {
         withAnimation {
-            score = Score(person: "DAK", score: 0)
+            score = Score(initials: "DAK", score: 0)
             self.showScore = true
         }
     }
@@ -242,15 +190,8 @@ struct TableDetailView : View {
     }
     
     private func saveScore(_ score: Score) {
-        if table.modelContext == nil {
-            modelContext.insert(table)
-        }
         table.scores.append(score)
-        do {
-            try modelContext.save()
-        } catch {
-            print("Failed saving score: \(error)")
-        }
+        table.scores.sort()
     }
     
     private func saveScore() {
@@ -285,16 +226,7 @@ struct TableDetailView : View {
             if let best = myScores.last {
                 if !table.scores.contains(where: { $0.score == best.numericScore }) {
                     withAnimation {
-                        saveScore(.init(person: "DAK", score: best.numericScore))
-
-                        // how do we get swiftui to notice the change
-                        // in table.scores relationship?  here I touch
-                        // the sortOrder as a workaround to force it
-                        // to refresh
-                        
-                        let old = self.sortOrder
-                        self.sortOrder = []
-                        self.sortOrder = old
+                        saveScore(.init(initials: "DAK", score: best.numericScore))
                     }
                 }
             }

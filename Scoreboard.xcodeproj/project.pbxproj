@@ -12,6 +12,7 @@
 		C314247F2C0D443600D34880 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C314247E2C0D443600D34880 /* ContentView.swift */; };
 		C31424832C0D443800D34880 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C31424822C0D443800D34880 /* Assets.xcassets */; };
 		C31424862C0D443800D34880 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C31424852C0D443800D34880 /* Preview Assets.xcassets */; };
+		C33173DA2C1F9AEA000D1058 /* ScoreboardDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = C33173D92C1F9AEA000D1058 /* ScoreboardDocument.swift */; };
 		C369813C2C15497000B4A704 /* VPinStudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = C369813B2C15497000B4A704 /* VPinStudio.swift */; };
 		C369813F2C1E38F400B4A704 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C369813E2C1E38F400B4A704 /* ContentView.swift */; };
 		C36981412C1E3BBA00B4A704 /* TagListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36981402C1E3BBA00B4A704 /* TagListView.swift */; };
@@ -24,7 +25,6 @@
 		C3D0AAD22C055A9300B8BD73 /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = C3D0AAD12C055A9300B8BD73 /* AsyncAlgorithms */; };
 		C3D0AAD62C056C6300B8BD73 /* CountedSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D0AAD52C056C6300B8BD73 /* CountedSet.swift */; };
 		C3D0AADA2C05758700B8BD73 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D0AAD92C05758700B8BD73 /* Model.swift */; };
-		C3D0AADE2C05783700B8BD73 /* Migration.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D0AADD2C05783700B8BD73 /* Migration.swift */; };
 		C3D0AAE22C057C4300B8BD73 /* PinupPopper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D0AAE12C057C4200B8BD73 /* PinupPopper.swift */; };
 		C3D0AAE42C057E0500B8BD73 /* PinballDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D0AAE32C057E0500B8BD73 /* PinballDB.swift */; };
 		C3D0AAE82C05A8FF00B8BD73 /* ScoreCameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D0AAE72C05A8FF00B8BD73 /* ScoreCameraView.swift */; };
@@ -44,6 +44,7 @@
 		C31424822C0D443800D34880 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C31424852C0D443800D34880 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		C31424872C0D443800D34880 /* OCRTest.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OCRTest.entitlements; sourceTree = "<group>"; };
+		C33173D92C1F9AEA000D1058 /* ScoreboardDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreboardDocument.swift; sourceTree = "<group>"; };
 		C369813B2C15497000B4A704 /* VPinStudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VPinStudio.swift; sourceTree = "<group>"; };
 		C369813D2C1CDE2E00B4A704 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		C369813E2C1E38F400B4A704 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -59,7 +60,6 @@
 		C3D0AACE2C055A6900B8BD73 /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
 		C3D0AAD52C056C6300B8BD73 /* CountedSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountedSet.swift; sourceTree = "<group>"; };
 		C3D0AAD92C05758700B8BD73 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
-		C3D0AADD2C05783700B8BD73 /* Migration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Migration.swift; sourceTree = "<group>"; };
 		C3D0AAE12C057C4200B8BD73 /* PinupPopper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinupPopper.swift; sourceTree = "<group>"; };
 		C3D0AAE32C057E0500B8BD73 /* PinballDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinballDB.swift; sourceTree = "<group>"; };
 		C3D0AAE72C05A8FF00B8BD73 /* ScoreCameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreCameraView.swift; sourceTree = "<group>"; };
@@ -149,10 +149,11 @@
 				C3D0AABE2C05593F00B8BD73 /* TableSearchView.swift */,
 				C36981402C1E3BBA00B4A704 /* TagListView.swift */,
 				C369813B2C15497000B4A704 /* VPinStudio.swift */,
+				C3D0AAD92C05758700B8BD73 /* Model.swift */,
 				C3D0AAC22C05594000B8BD73 /* Assets.xcassets */,
 				C3D0AAD72C05753F00B8BD73 /* Camera */,
-				C3D0AAD82C05754A00B8BD73 /* Model */,
 				C3D0AAC52C05594000B8BD73 /* Preview Content */,
+				C33173D92C1F9AEA000D1058 /* ScoreboardDocument.swift */,
 			);
 			path = Scoreboard;
 			sourceTree = "<group>";
@@ -173,15 +174,6 @@
 				C3D0AAD52C056C6300B8BD73 /* CountedSet.swift */,
 			);
 			path = Camera;
-			sourceTree = "<group>";
-		};
-		C3D0AAD82C05754A00B8BD73 /* Model */ = {
-			isa = PBXGroup;
-			children = (
-				C3D0AAD92C05758700B8BD73 /* Model.swift */,
-				C3D0AADD2C05783700B8BD73 /* Migration.swift */,
-			);
-			path = Model;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -310,8 +302,8 @@
 				C3D0AACF2C055A6900B8BD73 /* Camera.swift in Sources */,
 				C36981412C1E3BBA00B4A704 /* TagListView.swift in Sources */,
 				C3D0AABF2C05593F00B8BD73 /* TableSearchView.swift in Sources */,
+				C33173DA2C1F9AEA000D1058 /* ScoreboardDocument.swift in Sources */,
 				C369813C2C15497000B4A704 /* VPinStudio.swift in Sources */,
-				C3D0AADE2C05783700B8BD73 /* Migration.swift in Sources */,
 				C3D0AAE22C057C4300B8BD73 /* PinupPopper.swift in Sources */,
 				C3D0AAD62C056C6300B8BD73 /* CountedSet.swift in Sources */,
 				C3D0AABD2C05593F00B8BD73 /* ScoreboardApp.swift in Sources */,

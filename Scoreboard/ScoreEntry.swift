@@ -19,7 +19,7 @@ struct ScoreEntry : View {
 
     var body: some View {
         HStack {
-            TextField("initials", text: $score.person)
+            TextField("initials", text: $score.initials)
             
             #if os(iOS)
             TextField("score", value: $score.score, format: .number)
@@ -124,5 +124,5 @@ struct ScoreKeypad : View {
 }
 
 #Preview {
-    ScoreKeypad(score: .constant(.init(person: "DAK", score: 1234)))
+    ScoreKeypad(score: .constant(.init(initials: "DAK", score: 1234)))
 }

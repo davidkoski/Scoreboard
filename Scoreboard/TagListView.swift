@@ -7,14 +7,11 @@
 
 import Foundation
 import SwiftUI
-import SwiftData
 
 struct TagListView : View {
     
-    @Environment(\.modelContext) private var modelContext
+    @Binding var document: ScoreboardDocument
 
-    @Query(sort: [SortDescriptor(\Tag.sortOrder)]) var tags: [Tag]
-    
     @State private var confirmationShown = false
 
     @State private var tag = ""
@@ -39,7 +36,7 @@ struct TagListView : View {
             .padding(3)
                         
             List {
-                ForEach(tags, id: \.tag) { tag in
+                ForEach(document.contents.tags) { tag in
                     HStack {
                         NavigationLink(value: tag) {
                             display(symbol: tag.symbol)
@@ -49,37 +46,42 @@ struct TagListView : View {
                     }
                 }
                 .onDelete(perform: { indexes in
-                    tags
-                        .enumerated()
-                        .filter {
-                            indexes.contains($0.0)
-                        }
-                        .forEach { (_, tag) in
-                            modelContext.delete(tag)
-                        }
-                    try! modelContext.save()
+                    deleteTags(
+                        document.contents.tags
+                            .enumerated()
+                            .filter {
+                                indexes.contains($0.0)
+                            }
+                            .map { $0.1 }
+                        )
                 })
                 .onMove { indexes, position in
-                    var tags = self.tags
-                    tags.move(fromOffsets: indexes, toOffset: position)
-                    for (index, tag) in tags.enumerated() {
-                        tag.sortOrder = index
-                    }
-                    try? modelContext.save()
+                    document.contents.tags.move(fromOffsets: indexes, toOffset: position)
                 }
             }
         }
     }
     
-    private func delete(_ tag: Tag) {
-        modelContext.delete(tag)
-        try! modelContext.save()
+    private func deleteTags(_ tags: [Tag]) {
+        document.contents.tags.removeAll { tag in
+            tags.contains(tag)
+        }
+        
+        let delete = tags.map { $0.tag }
+        document.contents.tables = document.contents.tables.mapValues { table in
+            if !table.tags.isDisjoint(with: delete) {
+                var table = table
+                table.tags.subtract(delete)
+                return table
+            } else {
+                return table
+            }
+        }
     }
-    
+        
     private func save() {
         let tag = Tag(tag: tag, symbol: symbol.isEmpty ? nil : symbol)
-        modelContext.insert(tag)
-        try! modelContext.save()
+        document.contents.tags.append(tag)
         
         self.tag = ""
         self.symbol = ""

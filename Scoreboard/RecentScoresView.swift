@@ -7,43 +7,57 @@
 
 import Foundation
 import SwiftUI
-import SwiftData
+
+struct ScoreTable : Identifiable, Comparable {
+    let score: Score
+    let table: Table
+    var id: Date { score.date }
+    
+    static func < (lhs: ScoreTable, rhs: ScoreTable) -> Bool {
+        lhs.score.date > rhs.score.date
+    }
+}
 
 struct RecentScoresView : View {
-    
-    @Environment(\.modelContext) private var modelContext
-    
-    @Query
-    private var scores: [Score]
 
-    @State private var sortOrder = [KeyPathComparator(\Score.date, order: .reverse)]
+    let document: ScoreboardDocument
     
-    init() {
-        let recent = Date() - 2 * 3600 * 24
-        self._scores = Query(
-            filter: #Predicate<Score> {
-                $0.date > recent
-            })
-    }
+    @State var scores = [ScoreTable]()
 
     var body: some View {
-        SwiftUI.Table(scores.sorted(using: sortOrder), sortOrder: $sortOrder) {
-            TableColumn("Table") { score in
-                NavigationLink(value: score.table) {
-                    Text(score.table?.name ?? "-")
+        SwiftUI.Table(scores) {
+            TableColumn("Table") { st in
+                NavigationLink(value: st.table) {
+                    Text(st.table.name)
                 }
             }
                 .width(min: 200)
 
-            TableColumn("Name", value: \.person)
+            TableColumn("Initials", value: \.score.initials)
                 .width(min: 50, max: 50)
             
-            TableColumn("Score", value: \.score) { score in
-                Text(score.score.formatted())
+            TableColumn("Score") { st in
+                Text(st.score.score.formatted())
             }
-            TableColumn("Date", value: \.date) { score in
-                Text(score.date.formatted())
+            TableColumn("Date") { st in
+                Text(st.score.date.formatted())
             }
         }
-    }    
+        .task {
+            var scores = [ScoreTable]()
+            let recent = Date() - 3 * 24 * 3600
+            
+            for table in document.contents.tables.values {
+                let recentScores = table.scores.filter { $0.date > recent }
+                if !recentScores.isEmpty {
+                    scores.append(
+                        contentsOf:
+                            recentScores.map { ScoreTable(score: $0, table: table) }
+                    )
+                }
+            }
+            
+            self.scores = scores.sorted()
+        }
+    }
 }

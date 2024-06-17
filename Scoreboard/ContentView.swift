@@ -7,14 +7,21 @@
 
 import Foundation
 import SwiftUI
-import SwiftData
 
 struct ContentView : View {
-    
+
+    @Binding var document: ScoreboardDocument
+
     @State var path = NavigationPath()
     
-    @Environment(\.modelContext) private var modelContext
-
+    func tableBinding(_ table: Table) -> Binding<Table> {
+        Binding {
+            document[table]
+        } set: { newValue in
+            document[table] = newValue
+        }
+    }
+        
     var body: some View {
         NavigationStack(path: $path) {
             List {
@@ -25,22 +32,23 @@ struct ContentView : View {
             .navigationDestination(for: String.self) { key in
                 switch key {
                 case "Recent":
-                    RecentScoresView()
+                    RecentScoresView(document: document)
                 case "Tables":
-                    TableSearchView()
+                    TableSearchView(document: document)
                 case "Tags":
-                    TagListView()
-                case "Current":
-                    CurrentTableDetailView()
+                    TagListView(document: $document)
                 default:
                     EmptyView()
                 }
             }
             .navigationDestination(for: Table.self) { table in
-                TableDetailView(table: table)
+                TableDetailView(table: tableBinding(table), tags: document.contents.tags)
             }
             .navigationDestination(for: Tag.self) { tag in
-                TableListView(tables: tag.tables.sorted())
+                let tables = document.contents.tables.values
+                    .filter { $0.tags.contains(tag.tag) }
+                    .sorted()
+                TableListView(tables: tables)
             }
         }
         .toolbar {
@@ -49,7 +57,6 @@ struct ContentView : View {
             }
         }
         .onAppear() {
-            modelContext.autosaveEnabled = true
             path.append("Recent")
         }
     }
@@ -63,18 +70,15 @@ struct ContentView : View {
                 }
                 let id = current.id
                 
-                let tables = try modelContext.fetch(FetchDescriptor<Table>(predicate: #Predicate<Table> {
-                    $0.id == id
-                }))
-                
-                let table = tables.first ?? Table(id: current.id, name: current.name, popperId: current.gameID)
-                
+                var table = document[id] ?? Table(id: current.id, name: current.name, popperId: current.gameID)
+                                
                 // backfill missing popperId
                 if table.popperId == nil {
-                    table.popperId = current.gameID
+                    document[table].popperId = current.gameID
+                    table = document[table]
                 }
                 
-                if path.isEmpty {
+                if !path.isEmpty {
                     path.removeLast()
                 }
                 path.append(table)
