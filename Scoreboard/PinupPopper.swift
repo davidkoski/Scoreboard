@@ -17,6 +17,12 @@ struct PinupPopper {
         let id: String
         let gameID: String
         
+        var trimmedName: String {
+            name
+                .prefix { $0 != "(" }
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        
         enum CodingKeys: String, CodingKey {
             case name = "GameName"
             case id = "WEBGameID"

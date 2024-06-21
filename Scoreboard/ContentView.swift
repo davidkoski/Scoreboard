@@ -70,18 +70,25 @@ struct ContentView : View {
                 }
                 let id = current.id
                 
-                var table = document[id] ?? Table(id: current.id, name: current.name, popperId: current.gameID)
-                                
-                // backfill missing popperId
-                if table.popperId == nil {
-                    document[table].popperId = current.gameID
-                    table = document[table]
+                await MainActor.run {
+                    let table: Table
+                    
+                    if var existing = document[id] {
+                        // backfill missing popperId
+                        if existing.popperId == nil {
+                            document[existing].popperId = current.gameID
+                            existing = document[existing]
+                        }
+                        table = existing
+                    } else {
+                        table = Table(id: current.id, name: current.trimmedName, popperId: current.gameID)
+                    }
+                    
+                    if !path.isEmpty {
+                        path.removeLast()
+                    }
+                    path.append(table)
                 }
-                
-                if !path.isEmpty {
-                    path.removeLast()
-                }
-                path.append(table)
             } catch {
                 print("Unable to get current: \(error)")
             }

@@ -17,7 +17,6 @@ struct TableDetailView : View {
     @State var showCamera = false
     @State var score: Score?
     
-    @State private var sortOrder = [KeyPathComparator(\Score.score, order: .reverse)]
     @State private var confirmationShown = false
         
     var hideWhileEditing: Bool {
@@ -43,7 +42,8 @@ struct TableDetailView : View {
                     AsyncImage(url: VPinStudio().wheelImageURL(id: popperId)) { image in
                         image
                             .resizable()
-                            .frame(maxWidth: 144, maxHeight: 144)
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxWidth: 192, maxHeight: 144)
                     } placeholder: {
                         EmptyView()
                     }
@@ -130,38 +130,29 @@ struct TableDetailView : View {
                 #endif
 
                 if !hideWhileEditing {
-                    let scores = table.scores.sorted(using: sortOrder)
-                    
-                    SwiftUI.Table(scores, sortOrder: $sortOrder) {
-                        TableColumn("Initials", value: \.initials)
-                            .width(min: 50, max: 50)
-                        
-                        TableColumn("Score", value: \.score) { score in
-                            Text(score.score.formatted())
-                        }
-                        TableColumn("Date", value: \.date) { score in
-                            Text(score.date.formatted())
-                        }
-                        TableColumn("") { score in
-                            Button(role: .destructive, action: { confirmationShown = true }) {
-                                Image(systemName: "trash")
-                            }
-                            .confirmationDialog(
-                                "Are you sure?",
-                                isPresented: $confirmationShown
-                            ) {
-                                Button("Yes") {
-                                    delete(score: score)
-                                }
+                    List {
+                        ForEach(table.scores) { score in
+                            HStack {
+                                Text(score.initials)
+                                    .frame(width: 50)
+                                Text(score.score.formatted())
+                                    .frame(width: 200, alignment: .trailing)
+                                Text(score.date.formatted())
+                                    .frame(width: 200)
                             }
                         }
-                        .width(min: 30, max: 30)
+                        .onDelete { indexes in
+                            if let index = indexes.first {
+                                delete(score: table.scores[index])
+                            }
+                        }
                     }
                 }
             }
         }
     }
     
+    @MainActor
     private func delete(score: Score) {
         withAnimation {
             table.scores.removeAll { $0 == score }
@@ -189,11 +180,13 @@ struct TableDetailView : View {
         self.showCamera = false
     }
     
+    @MainActor
     private func saveScore(_ score: Score) {
         table.scores.append(score)
         table.scores.sort()
     }
     
+    @MainActor
     private func saveScore() {
         withAnimation {
             if let score {
@@ -225,8 +218,10 @@ struct TableDetailView : View {
             
             if let best = myScores.last {
                 if !table.scores.contains(where: { $0.score == best.numericScore }) {
-                    withAnimation {
-                        saveScore(.init(initials: "DAK", score: best.numericScore))
+                    await MainActor.run {
+                        withAnimation {
+                            saveScore(.init(initials: "DAK", score: best.numericScore))
+                        }
                     }
                 }
             }

@@ -14,7 +14,17 @@ struct TableListView : View {
     var body: some View {
         List {
             ForEach(tables) { table in
-                NavigationLink(table.name, value: table)
+                NavigationLink(value: table) {
+                    HStack {
+                        Text(table.name)
+                            .frame(width: 500, alignment: .leading)
+                        
+                        if let score = table.scores.first {
+                            Text(score.score.formatted())
+                                .frame(width: 250, alignment: .trailing)
+                        }
+                    }
+                }
             }
         }
         .frame(minWidth: 200)

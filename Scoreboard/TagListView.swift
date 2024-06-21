@@ -62,6 +62,7 @@ struct TagListView : View {
         }
     }
     
+    @MainActor
     private func deleteTags(_ tags: [Tag]) {
         document.contents.tags.removeAll { tag in
             tags.contains(tag)
@@ -79,6 +80,7 @@ struct TagListView : View {
         }
     }
         
+    @MainActor
     private func save() {
         let tag = Tag(tag: tag, symbol: symbol.isEmpty ? nil : symbol)
         document.contents.tags.append(tag)
