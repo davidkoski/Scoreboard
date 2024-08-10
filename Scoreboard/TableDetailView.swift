@@ -76,40 +76,8 @@ struct TableDetailView : View {
                         .padding()
                         .disabled(showScore)
                         
-                        HStack {
-                            ForEach(tags) { tag in
-                                let selected = table.tags.contains(tag.tag)
-                                
-                                #if os(iOS)
-                                let background = Color(white: 0.1)
-                                #else
-                                let background = Color(white: 0.9)
-                                #endif
-                                
-                                display(tag: tag)
-                                    .foregroundStyle(.black)
-                                    .padding()
-                                    .background {
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .foregroundColor(selected ? .white : background)
-                                        Circle()
-                                            .foregroundStyle(selected ? .white : Color(white: 0.8))
-                                            .padding(6)
-                                    }
-                                    .onTapGesture {
-                                        if table.tags.contains(tag.tag) {
-                                            table.tags.remove(tag.tag)
-                                        } else {
-                                            table.tags.insert(tag.tag)
-                                        }
-                                    }
-                                    .help(tag.tag)
-                            }
-                        }
-                        #if os(iOS)
-                        .font(.system(size: 32))
-                        #else
-                        #endif
+                        // not really doing much with tags
+                        // tagsView()
                     }
                 }
             }
@@ -150,6 +118,52 @@ struct TableDetailView : View {
                 }
             }
         }
+        .toolbar {
+            Button(action: showVpinMania) {
+                Text("VPin Mania")
+            }
+        }
+    }
+    
+    private func tagsView() -> some View {
+        HStack {
+            ForEach(tags) { tag in
+                let selected = table.tags.contains(tag.tag)
+                
+                #if os(iOS)
+                let background = Color(white: 0.1)
+                #else
+                let background = Color(white: 0.9)
+                #endif
+                
+                display(tag: tag)
+                    .foregroundStyle(.black)
+                    .padding()
+                    .background {
+                        RoundedRectangle(cornerRadius: 8)
+                            .foregroundColor(selected ? .white : background)
+                        Circle()
+                            .foregroundStyle(selected ? .white : Color(white: 0.8))
+                            .padding(6)
+                    }
+                    .onTapGesture {
+                        if table.tags.contains(tag.tag) {
+                            table.tags.remove(tag.tag)
+                        } else {
+                            table.tags.insert(tag.tag)
+                        }
+                    }
+                    .help(tag.tag)
+            }
+        }
+        #if os(iOS)
+        .font(.system(size: 32))
+        #else
+        #endif
+    }
+    
+    private func showVpinMania() {
+        
     }
     
     @MainActor
@@ -208,15 +222,7 @@ struct TableDetailView : View {
         Task {
             let allScores = try await VPinStudio().getScores(id: id)
             
-            let myScores = Set(
-                allScores
-                    .filter {
-                        $0.playerInitials == "DAK"
-                    }
-            )
-            .sorted()
-            
-            if let best = myScores.last {
+            if let best = bestScore(allScores) {
                 if !table.scores.contains(where: { $0.score == best.numericScore }) {
                     await MainActor.run {
                         withAnimation {
