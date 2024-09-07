@@ -5,19 +5,19 @@
 //  Created by David Koski on 6/2/24.
 //
 
-import SwiftUI
 import CoreImage
 import CoreImage.CIFilterBuiltins
+import SwiftUI
 import Vision
 
 struct ContentView: View {
-    
+
     @State var files = [URL]()
     @State var input: CIImage?
     @State var context = CIContext()
-    
+
     @State var detected: String?
-    
+
     @State var noir = false
     @State var otsu = false
     @State var max = false
@@ -35,7 +35,7 @@ struct ContentView: View {
                     }
                 }
             }
-            
+
             HStack {
                 if input != nil {
                     VStack {
@@ -76,13 +76,13 @@ struct ContentView: View {
                     }
                 }
             }
-            
+
         }
         .task {
             files = findImages()
         }
     }
-    
+
     var image: CGImage? {
         if let input {
             context.createCGImage(input, from: input.extent)
@@ -90,21 +90,21 @@ struct ContentView: View {
             nil
         }
     }
-    
+
     var processed: CGImage? {
         if let input {
             var image = input
-            
+
             // Good:
             // otsu + 1 dilate
             // max + 1 dilate
-            
+
             if noir {
                 let filter = CIFilter.photoEffectNoir()
                 filter.inputImage = image
                 image = filter.outputImage!
             }
-            
+
             if otsu {
                 let filter = CIFilter.colorThresholdOtsu()
                 filter.inputImage = image
@@ -152,24 +152,23 @@ struct ContentView: View {
             }
 
             let processed = context.createCGImage(image, from: image.extent)
-            
+
             Task {
                 self.detected = await detect(processed!)
             }
-            
-            
+
             return processed
         } else {
             return nil
         }
     }
-    
+
     private func detect(_ input: CGImage) async -> String? {
         let requestHandler = VNImageRequestHandler(cgImage: input)
-        
+
         return await withCheckedContinuation { continuation in
-            
-            let request = VNRecognizeTextRequest() { response, error in
+
+            let request = VNRecognizeTextRequest { response, error in
                 guard let response = response as? VNRecognizeTextRequest else {
                     continuation.resume(returning: nil)
                     return
@@ -182,11 +181,11 @@ struct ContentView: View {
                 }
                 continuation.resume(returning: nil)
             }
-            
+
             try? requestHandler.perform([request])
         }
     }
-    
+
     private func select(_ url: URL) {
         input = CIImage(contentsOf: url)
     }
@@ -194,15 +193,17 @@ struct ContentView: View {
     private func findImages() -> [URL] {
         let bundle = Bundle.main
         if let resources = bundle.resourceURL {
-            return try! FileManager.default.contentsOfDirectory(at: resources, includingPropertiesForKeys: nil, options: [])
-                .filter {
-                    switch $0.pathExtension.lowercased() {
-                    case "jpg", "jpeg", "png", "heic":
-                        return true
-                    default:
-                        return false
-                    }
+            return try! FileManager.default.contentsOfDirectory(
+                at: resources, includingPropertiesForKeys: nil, options: []
+            )
+            .filter {
+                switch $0.pathExtension.lowercased() {
+                case "jpg", "jpeg", "png", "heic":
+                    return true
+                default:
+                    return false
                 }
+            }
         }
         return []
     }

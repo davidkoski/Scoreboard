@@ -8,16 +8,16 @@
 import Foundation
 import SwiftUI
 
-struct ContentView : View {
+struct ContentView: View {
 
     @Binding var document: ScoreboardDocument
 
     @State var path = NavigationPath()
-    
+
     @State var busy = false
     @State var current: String?
     @State var messages = [String]()
-    
+
     func tableBinding(_ table: Table) -> Binding<Table> {
         Binding {
             document[table]
@@ -25,7 +25,7 @@ struct ContentView : View {
             document[table] = newValue
         }
     }
-        
+
     var body: some View {
         NavigationStack(path: $path) {
             List {
@@ -49,7 +49,8 @@ struct ContentView : View {
                 }
             }
             .navigationDestination(for: Table.self) { table in
-                TableDetailView(document: document, table: tableBinding(table), tags: document.contents.tags)
+                TableDetailView(
+                    document: document, table: tableBinding(table), tags: document.contents.tags)
             }
             .navigationDestination(for: Tag.self) { tag in
                 let tables = document.contents.tables.values
@@ -59,12 +60,13 @@ struct ContentView : View {
             }
         }
         .toolbar {
-            VPinStudioScanner(document: $document, busy: $busy, current: $current, messages: $messages)
+            VPinStudioScanner(
+                document: $document, busy: $busy, current: $current, messages: $messages)
             Button(action: selectCurrent) {
                 Text("Current")
             }
         }
-        .onAppear() {
+        .onAppear {
             path.append("Recent")
         }
         .overlay {
@@ -86,7 +88,7 @@ struct ContentView : View {
                                 Text(message)
                             }
                         }
-                        
+
                         Button(action: { messages.removeAll() }) {
                             Text("OK")
                         }
@@ -98,7 +100,7 @@ struct ContentView : View {
             }
         }
     }
-    
+
     private func selectCurrent() {
         Task {
             do {
@@ -106,22 +108,22 @@ struct ContentView : View {
                     print("Unable to get current from PinupPopper")
                     return
                 }
-                
+
                 @MainActor
                 func find() -> Table? {
                     if let table = document[id] {
                         return table
                     }
-                    
+
                     for table in document.contents.tables.values {
                         if table.popperId == id {
                             return table
                         }
                     }
-                    
+
                     return nil
                 }
-                
+
                 if let table = find() {
                     if !path.isEmpty {
                         path.removeLast()

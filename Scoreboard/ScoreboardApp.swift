@@ -9,10 +9,12 @@ import SwiftUI
 
 @main
 struct ScoreboardApp: App {
-    
+
     var body: some Scene {
-        DocumentGroup(newDocument: ScoreboardDocument(), editor: { configuration in
-            ContentView(document: configuration.$document)
-        })
+        DocumentGroup(
+            newDocument: ScoreboardDocument(),
+            editor: { configuration in
+                ContentView(document: configuration.$document)
+            })
     }
 }

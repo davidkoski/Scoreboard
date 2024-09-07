@@ -6,23 +6,23 @@
 //
 
 import Foundation
-import UniformTypeIdentifiers
 import SwiftUI
+import UniformTypeIdentifiers
 
-enum ScoreboardDocumentError : Error {
+enum ScoreboardDocumentError: Error {
     case noData
 }
 
-struct ScoreboardDocument : FileDocument {
-    
+struct ScoreboardDocument: FileDocument {
+
     static let readableContentTypes = [UTType(importedAs: "com.koski.scoreboards")]
-    
+
     var contents: Scoreboard
 
     init() {
         contents = Scoreboard()
     }
-    
+
     init(configuration: ReadConfiguration) throws {
         if let data = configuration.file.regularFileContents {
             self.contents = try JSONDecoder().decode(Scoreboard.self, from: data)
@@ -30,7 +30,7 @@ struct ScoreboardDocument : FileDocument {
             throw ScoreboardDocumentError.noData
         }
     }
-    
+
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
         FileWrapper(
             regularFileWithContents: try JSONEncoder().encode(contents))
@@ -53,7 +53,7 @@ struct ScoreboardDocument : FileDocument {
             contents.tables[table.id] = newValue
         }
     }
-    
+
     func isPrimaryForHighScore(_ table: Table) -> Bool {
         if let key = table.highScoreKey {
             contents.primaryForHighScoreKey[key] == table.id
@@ -61,7 +61,7 @@ struct ScoreboardDocument : FileDocument {
             true
         }
     }
-    
+
     func primaryForHighScore(_ table: Table) -> Table? {
         if let key = table.highScoreKey {
             if let id = contents.primaryForHighScoreKey[key] {
@@ -73,7 +73,7 @@ struct ScoreboardDocument : FileDocument {
             table
         }
     }
-    
+
     func hasPrimaryForHighScore(_ table: Table) -> Bool {
         if let key = table.highScoreKey {
             contents.primaryForHighScoreKey[key] != nil
@@ -81,7 +81,7 @@ struct ScoreboardDocument : FileDocument {
             true
         }
     }
-    
+
     func hasPrimaryForHighScore(_ key: String) -> Bool {
         contents.primaryForHighScoreKey[key] != nil
     }
@@ -92,4 +92,3 @@ struct ScoreboardDocument : FileDocument {
         }
     }
 }
-

@@ -11,9 +11,9 @@ import SwiftUI
 /// we need this wrapper so we have a distinct type for the navigationDestination
 struct NVRam: Hashable, Identifiable, Comparable {
     let key: String
-    
+
     var id: String { key }
-    
+
     init?(_ key: String?) {
         if let key {
             self.key = key
@@ -21,16 +21,16 @@ struct NVRam: Hashable, Identifiable, Comparable {
             return nil
         }
     }
-    
+
     static func < (lhs: NVRam, rhs: NVRam) -> Bool {
         lhs.key < rhs.key
     }
 }
 
-struct NVRamView : View {
-    
+struct NVRamView: View {
+
     @Binding var document: ScoreboardDocument
-    
+
     @State var counts: [NVRam: Int] = [:]
     @State var needsPrimary: Set<NVRam> = []
 
@@ -53,18 +53,20 @@ struct NVRamView : View {
             counts = Dictionary(
                 grouping: document.contents.tables.values
                     .compactMap { NVRam($0.highScoreKey) },
-                by: \.self)
-                .mapValues(\.count)
-                .filter { $0.value > 1 }
-            
-            needsPrimary = Set(counts.keys
-                .filter { !document.hasPrimaryForHighScore($0.key) })
+                by: \.self
+            )
+            .mapValues(\.count)
+            .filter { $0.value > 1 }
+
+            needsPrimary = Set(
+                counts.keys
+                    .filter { !document.hasPrimaryForHighScore($0.key) })
         }
     }
 }
 
-struct NVRamListView : View {
-    
+struct NVRamListView: View {
+
     @Binding var document: ScoreboardDocument
     let highScoreKey: String
 
@@ -72,7 +74,7 @@ struct NVRamListView : View {
         let tables = document.contents.tables.values
             .filter { $0.highScoreKey == highScoreKey }
             .sorted()
-        
+
         return ScrollView(.vertical) {
             VStack {
                 ForEach(tables) { table in
@@ -87,4 +89,3 @@ struct NVRamListView : View {
         }
     }
 }
-

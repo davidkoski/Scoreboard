@@ -8,20 +8,20 @@
 import Foundation
 import SwiftUI
 
-struct ScoreTable : Identifiable, Comparable {
+struct ScoreTable: Identifiable, Comparable {
     let score: Score
     let table: Table
     var id: Date { score.date }
-    
+
     static func < (lhs: ScoreTable, rhs: ScoreTable) -> Bool {
         lhs.score.date > rhs.score.date
     }
 }
 
-struct RecentScoresView : View {
+struct RecentScoresView: View {
 
     let document: ScoreboardDocument
-    
+
     @State var scores = [ScoreTable]()
 
     var body: some View {
@@ -31,11 +31,11 @@ struct RecentScoresView : View {
                     Text(st.table.name)
                 }
             }
-                .width(min: 200)
+            .width(min: 200)
 
             TableColumn("Initials", value: \.score.initials)
                 .width(min: 50, max: 50)
-            
+
             TableColumn("Score") { st in
                 Text(st.score.score.formatted())
             }
@@ -46,7 +46,7 @@ struct RecentScoresView : View {
         .task {
             var scores = [ScoreTable]()
             let recent = Date() - 3 * 24 * 3600
-            
+
             for table in document.contents.tables.values {
                 let recentScores = table.scores.filter { $0.date > recent }
                 if !recentScores.isEmpty {
@@ -56,7 +56,7 @@ struct RecentScoresView : View {
                     )
                 }
             }
-            
+
             self.scores = scores.sorted()
         }
     }

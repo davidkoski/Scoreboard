@@ -8,4 +8,3 @@
 import Foundation
 
 public let OWNER_INITIALS = "DAK"
-

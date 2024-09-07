@@ -8,12 +8,12 @@
 import Foundation
 import SwiftUI
 
-struct TableDetailView : View {
-    
+struct TableDetailView: View {
+
     let document: ScoreboardDocument
     @Binding var table: Table
     let tags: [Tag]
-    
+
     @State var showScore = false
     @State var showCamera = false
     @State var score: Score?
@@ -22,17 +22,17 @@ struct TableDetailView : View {
     @State var primaryForHighScore: Table?
 
     @State var vpinManiaScores: [Score]?
-    
+
     @State private var confirmationShown = false
-        
+
     var hideWhileEditing: Bool {
         #if os(iOS)
-        showScore
+            showScore
         #else
-        false
+            false
         #endif
     }
-    
+
     var scoreBinding: Binding<Score> {
         Binding {
             score ?? .init(initials: OWNER_INITIALS, score: 0, date: Date())
@@ -40,7 +40,7 @@ struct TableDetailView : View {
             self.score = newValue
         }
     }
-    
+
     var body: some View {
         VStack {
             HStack {
@@ -54,7 +54,7 @@ struct TableDetailView : View {
                         EmptyView()
                     }
                 }
-                
+
                 VStack {
                     HStack {
                         Spacer()
@@ -62,7 +62,7 @@ struct TableDetailView : View {
                             .font(.headline)
                         Spacer()
                     }
-                    
+
                     if let primaryForHighScore {
                         HStack {
                             Spacer()
@@ -71,17 +71,17 @@ struct TableDetailView : View {
                             Spacer()
                         }
                     }
-                    
+
                     if !hideWhileEditing {
                         HStack {
                             Button(action: createNewScoreFromCamera) {
                                 Image(systemName: "camera")
                             }
-                            
+
                             Button(action: createNewScoreFromKeyboard) {
                                 Image(systemName: "keyboard")
                             }
-                            
+
                             if isPrimaryForHighScore {
                                 Button(action: downloadScores) {
                                     Image(systemName: "square.and.arrow.down")
@@ -91,26 +91,26 @@ struct TableDetailView : View {
                         .buttonStyle(.plain)
                         .padding()
                         .disabled(showScore)
-                        
+
                         // not really doing much with tags
                         // tagsView()
                     }
                 }
             }
-                        
+
             VStack {
                 if showScore {
                     if showCamera {
                         ScoreCameraView(score: scoreBinding.score)
                     }
-                    
+
                     ScoreEntry(score: scoreBinding, save: saveScore, cancel: cancelScore)
                 }
-                
+
                 #if os(iOS)
-                if showScore {
-                    ScoreKeypad(score: scoreBinding)
-                }
+                    if showScore {
+                        ScoreKeypad(score: scoreBinding)
+                    }
                 #endif
 
                 if !hideWhileEditing {
@@ -155,18 +155,18 @@ struct TableDetailView : View {
             vpinManiaScores = nil
         }
     }
-    
+
     private func tagsView() -> some View {
         HStack {
             ForEach(tags) { tag in
                 let selected = table.tags.contains(tag.tag)
-                
+
                 #if os(iOS)
-                let background = Color(white: 0.1)
+                    let background = Color(white: 0.1)
                 #else
-                let background = Color(white: 0.9)
+                    let background = Color(white: 0.9)
                 #endif
-                
+
                 display(tag: tag)
                     .foregroundStyle(.black)
                     .padding()
@@ -188,11 +188,11 @@ struct TableDetailView : View {
             }
         }
         #if os(iOS)
-        .font(.system(size: 32))
+            .font(.system(size: 32))
         #else
         #endif
     }
-    
+
     private func combinedScores() -> [Score] {
         if let vpinManiaScores {
             (table.scores + vpinManiaScores).sorted()
@@ -200,14 +200,15 @@ struct TableDetailView : View {
             table.scores.sorted()
         }
     }
-    
+
     private func showVpinMania() {
         Task {
             do {
                 let scores = try await VPinStudio().getVPinManiaScores(id: table.id)
-                
+
                 withAnimation {
-                    self.vpinManiaScores = scores
+                    self.vpinManiaScores =
+                        scores
                         .filter {
                             // filter out my local scores
                             $0.initials != OWNER_INITIALS
@@ -221,7 +222,7 @@ struct TableDetailView : View {
             }
         }
     }
-    
+
     @MainActor
     private func delete(score: Score) {
         withAnimation {
@@ -236,26 +237,26 @@ struct TableDetailView : View {
             self.showCamera = true
         }
     }
-    
+
     private func createNewScoreFromKeyboard() {
         withAnimation {
             score = Score(initials: OWNER_INITIALS, score: 0)
             self.showScore = true
         }
     }
-    
+
     private func stopScore() {
         self.score = nil
         self.showScore = false
         self.showCamera = false
     }
-    
+
     @MainActor
     private func saveScore(_ score: Score) {
         table.scores.append(score)
         table.scores.sort()
     }
-    
+
     @MainActor
     private func saveScore() {
         withAnimation {
@@ -265,19 +266,19 @@ struct TableDetailView : View {
             stopScore()
         }
     }
-    
+
     private func cancelScore() {
         withAnimation {
             stopScore()
         }
     }
-    
+
     private func downloadScores() {
         let id = table.popperId
-        
+
         Task {
             let allScores = try await VPinStudio().getScores(id: id)
-            
+
             if let best = bestScore(allScores) {
                 if !table.scores.contains(where: { $0.score == best.numericScore }) {
                     await MainActor.run {
@@ -290,4 +291,3 @@ struct TableDetailView : View {
         }
     }
 }
-
