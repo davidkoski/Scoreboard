@@ -17,6 +17,9 @@
 		C369813F2C1E38F400B4A704 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C369813E2C1E38F400B4A704 /* ContentView.swift */; };
 		C36981412C1E3BBA00B4A704 /* TagListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36981402C1E3BBA00B4A704 /* TagListView.swift */; };
 		C36981432C1E4C2900B4A704 /* ScoreEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36981422C1E4C2900B4A704 /* ScoreEntry.swift */; };
+		C3A4102E2C6EE33B00E47F63 /* VPinStudioScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3A4102D2C6EE33B00E47F63 /* VPinStudioScanner.swift */; };
+		C3A410302C6EE83C00E47F63 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3A4102F2C6EE83C00E47F63 /* Configuration.swift */; };
+		C3A410322C6EE89A00E47F63 /* NVRamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3A410312C6EE89A00E47F63 /* NVRamView.swift */; };
 		C3D0AABD2C05593F00B8BD73 /* ScoreboardApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D0AABC2C05593F00B8BD73 /* ScoreboardApp.swift */; };
 		C3D0AABF2C05593F00B8BD73 /* TableSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D0AABE2C05593F00B8BD73 /* TableSearchView.swift */; };
 		C3D0AAC32C05594000B8BD73 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C3D0AAC22C05594000B8BD73 /* Assets.xcassets */; };
@@ -50,6 +53,9 @@
 		C369813E2C1E38F400B4A704 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		C36981402C1E3BBA00B4A704 /* TagListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagListView.swift; sourceTree = "<group>"; };
 		C36981422C1E4C2900B4A704 /* ScoreEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreEntry.swift; sourceTree = "<group>"; };
+		C3A4102D2C6EE33B00E47F63 /* VPinStudioScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VPinStudioScanner.swift; sourceTree = "<group>"; };
+		C3A4102F2C6EE83C00E47F63 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
+		C3A410312C6EE89A00E47F63 /* NVRamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NVRamView.swift; sourceTree = "<group>"; };
 		C3D0AAB92C05593F00B8BD73 /* Scoreboard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Scoreboard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3D0AABC2C05593F00B8BD73 /* ScoreboardApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreboardApp.swift; sourceTree = "<group>"; };
 		C3D0AABE2C05593F00B8BD73 /* TableSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableSearchView.swift; sourceTree = "<group>"; };
@@ -140,6 +146,7 @@
 				C3D0AAC42C05594000B8BD73 /* Scoreboard.entitlements */,
 				C3D0AACD2C0559C000B8BD73 /* Info.plist */,
 				C369813E2C1E38F400B4A704 /* ContentView.swift */,
+				C3A4102D2C6EE33B00E47F63 /* VPinStudioScanner.swift */,
 				C3D0AAE32C057E0500B8BD73 /* PinballDB.swift */,
 				C3D0AAE12C057C4200B8BD73 /* PinupPopper.swift */,
 				C31424722C07F21900D34880 /* RecentScoresView.swift */,
@@ -154,6 +161,8 @@
 				C3D0AAD72C05753F00B8BD73 /* Camera */,
 				C3D0AAC52C05594000B8BD73 /* Preview Content */,
 				C33173D92C1F9AEA000D1058 /* ScoreboardDocument.swift */,
+				C3A4102F2C6EE83C00E47F63 /* Configuration.swift */,
+				C3A410312C6EE89A00E47F63 /* NVRamView.swift */,
 			);
 			path = Scoreboard;
 			sourceTree = "<group>";
@@ -297,6 +306,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C36981432C1E4C2900B4A704 /* ScoreEntry.swift in Sources */,
+				C3A4102E2C6EE33B00E47F63 /* VPinStudioScanner.swift in Sources */,
 				C3D0AADA2C05758700B8BD73 /* Model.swift in Sources */,
 				C3D0AAE42C057E0500B8BD73 /* PinballDB.swift in Sources */,
 				C3D0AACF2C055A6900B8BD73 /* Camera.swift in Sources */,
@@ -304,7 +314,9 @@
 				C3D0AABF2C05593F00B8BD73 /* TableSearchView.swift in Sources */,
 				C33173DA2C1F9AEA000D1058 /* ScoreboardDocument.swift in Sources */,
 				C369813C2C15497000B4A704 /* VPinStudio.swift in Sources */,
+				C3A410322C6EE89A00E47F63 /* NVRamView.swift in Sources */,
 				C3D0AAE22C057C4300B8BD73 /* PinupPopper.swift in Sources */,
+				C3A410302C6EE83C00E47F63 /* Configuration.swift in Sources */,
 				C3D0AAD62C056C6300B8BD73 /* CountedSet.swift in Sources */,
 				C3D0AABD2C05593F00B8BD73 /* ScoreboardApp.swift in Sources */,
 				C31424732C07F21900D34880 /* RecentScoresView.swift in Sources */,

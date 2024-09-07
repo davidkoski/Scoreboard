@@ -39,21 +39,18 @@ struct PinupPopper {
     }
 
     
-    public func currentTable() async throws -> Table? {
+    public func currentTableId() async throws -> String? {
         let request = URLRequest(url: getItem)
         let (data, _) = try await URLSession.shared.data(for: request)
         
         if let table = try? JSONDecoder().decode(Table.self, from: data) {
-            return table
+            return table.gameID
         }
         
         // if the game is not running but is selected in popper we only have
         // the gameId (primary key in the popper db)
         if let gameIdTable = try? JSONDecoder().decode(TableJustGameID.self, from: data) {
-            let gameID = gameIdTable.gameID.description
-            let info = try await VPinStudio().getDetailsShort(id: gameID)
-            
-            return .init(name: info.gameName, id: info.id, gameID: gameID)
+            return gameIdTable.gameID.description
         }
         
         return nil

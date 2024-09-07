@@ -10,12 +10,18 @@ import SwiftUI
 
 struct TableDetailView : View {
     
+    let document: ScoreboardDocument
     @Binding var table: Table
     let tags: [Tag]
     
     @State var showScore = false
     @State var showCamera = false
     @State var score: Score?
+
+    @State var isPrimaryForHighScore = false
+    @State var primaryForHighScore: Table?
+
+    @State var vpinManiaScores: [Score]?
     
     @State private var confirmationShown = false
         
@@ -29,7 +35,7 @@ struct TableDetailView : View {
     
     var scoreBinding: Binding<Score> {
         Binding {
-            score ?? .init(initials: "DAK", score: 0, date: Date())
+            score ?? .init(initials: OWNER_INITIALS, score: 0, date: Date())
         } set: { newValue in
             self.score = newValue
         }
@@ -38,8 +44,8 @@ struct TableDetailView : View {
     var body: some View {
         VStack {
             HStack {
-                if !hideWhileEditing, let popperId = table.popperId {
-                    AsyncImage(url: VPinStudio().wheelImageURL(id: popperId)) { image in
+                if !hideWhileEditing {
+                    AsyncImage(url: VPinStudio().wheelImageURL(id: table.popperId)) { image in
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fit)
@@ -57,6 +63,15 @@ struct TableDetailView : View {
                         Spacer()
                     }
                     
+                    if let primaryForHighScore {
+                        HStack {
+                            Spacer()
+                            Text("Primary for NVRam: ")
+                            Text(primaryForHighScore.name)
+                            Spacer()
+                        }
+                    }
+                    
                     if !hideWhileEditing {
                         HStack {
                             Button(action: createNewScoreFromCamera) {
@@ -67,10 +82,11 @@ struct TableDetailView : View {
                                 Image(systemName: "keyboard")
                             }
                             
-                            Button(action: downloadScores) {
-                                Image(systemName: "square.and.arrow.down")
+                            if isPrimaryForHighScore {
+                                Button(action: downloadScores) {
+                                    Image(systemName: "square.and.arrow.down")
+                                }
                             }
-                            .disabled(table.popperId == nil)
                         }
                         .buttonStyle(.plain)
                         .padding()
@@ -99,7 +115,7 @@ struct TableDetailView : View {
 
                 if !hideWhileEditing {
                     List {
-                        ForEach(table.scores) { score in
+                        ForEach(combinedScores()) { score in
                             HStack {
                                 Text(score.initials)
                                     .frame(width: 50)
@@ -107,6 +123,12 @@ struct TableDetailView : View {
                                     .frame(width: 200, alignment: .trailing)
                                 Text(score.date.formatted())
                                     .frame(width: 200)
+                            }
+                            .bold(score.initials == OWNER_INITIALS)
+                            .contextMenu {
+                                Button(action: { delete(score: score) }) {
+                                    Text("Delete")
+                                }
                             }
                         }
                         .onDelete { indexes in
@@ -122,6 +144,15 @@ struct TableDetailView : View {
             Button(action: showVpinMania) {
                 Text("VPin Mania")
             }
+        }
+        .task {
+            isPrimaryForHighScore = document.isPrimaryForHighScore(table)
+            if !isPrimaryForHighScore {
+                primaryForHighScore = document.primaryForHighScore(table)
+            }
+        }
+        .onChange(of: table) {
+            vpinManiaScores = nil
         }
     }
     
@@ -162,8 +193,33 @@ struct TableDetailView : View {
         #endif
     }
     
+    private func combinedScores() -> [Score] {
+        if let vpinManiaScores {
+            (table.scores + vpinManiaScores).sorted()
+        } else {
+            table.scores.sorted()
+        }
+    }
+    
     private func showVpinMania() {
-        
+        Task {
+            do {
+                let scores = try await VPinStudio().getVPinManiaScores(id: table.id)
+                
+                withAnimation {
+                    self.vpinManiaScores = scores
+                        .filter {
+                            // filter out my local scores
+                            $0.initials != OWNER_INITIALS
+                        }
+                        .map {
+                            Score(initials: $0.initials, score: $0.score, date: $0.creationDate)
+                        }
+                }
+            } catch {
+                print("Error fetching vpin mania scores: \(error)")
+            }
+        }
     }
     
     @MainActor
@@ -175,7 +231,7 @@ struct TableDetailView : View {
 
     private func createNewScoreFromCamera() {
         withAnimation {
-            score = Score(initials: "DAK", score: 0)
+            score = Score(initials: OWNER_INITIALS, score: 0)
             self.showScore = true
             self.showCamera = true
         }
@@ -183,7 +239,7 @@ struct TableDetailView : View {
     
     private func createNewScoreFromKeyboard() {
         withAnimation {
-            score = Score(initials: "DAK", score: 0)
+            score = Score(initials: OWNER_INITIALS, score: 0)
             self.showScore = true
         }
     }
@@ -217,7 +273,7 @@ struct TableDetailView : View {
     }
     
     private func downloadScores() {
-        guard let id = table.popperId else { return }
+        let id = table.popperId
         
         Task {
             let allScores = try await VPinStudio().getScores(id: id)
@@ -226,7 +282,7 @@ struct TableDetailView : View {
                 if !table.scores.contains(where: { $0.score == best.numericScore }) {
                     await MainActor.run {
                         withAnimation {
-                            saveScore(.init(initials: "DAK", score: best.numericScore))
+                            saveScore(.init(initials: OWNER_INITIALS, score: best.numericScore))
                         }
                     }
                 }

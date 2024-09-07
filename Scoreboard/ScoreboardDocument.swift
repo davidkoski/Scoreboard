@@ -53,5 +53,43 @@ struct ScoreboardDocument : FileDocument {
             contents.tables[table.id] = newValue
         }
     }
+    
+    func isPrimaryForHighScore(_ table: Table) -> Bool {
+        if let key = table.highScoreKey {
+            contents.primaryForHighScoreKey[key] == table.id
+        } else {
+            true
+        }
+    }
+    
+    func primaryForHighScore(_ table: Table) -> Table? {
+        if let key = table.highScoreKey {
+            if let id = contents.primaryForHighScoreKey[key] {
+                contents.tables[id]
+            } else {
+                nil
+            }
+        } else {
+            table
+        }
+    }
+    
+    func hasPrimaryForHighScore(_ table: Table) -> Bool {
+        if let key = table.highScoreKey {
+            contents.primaryForHighScoreKey[key] != nil
+        } else {
+            true
+        }
+    }
+    
+    func hasPrimaryForHighScore(_ key: String) -> Bool {
+        contents.primaryForHighScoreKey[key] != nil
+    }
+
+    mutating func setIsPrimaryForHighScore(_ table: Table) {
+        if let key = table.highScoreKey {
+            contents.primaryForHighScoreKey[key] = table.id
+        }
+    }
 }
 

@@ -12,8 +12,6 @@ struct TagListView : View {
     
     @Binding var document: ScoreboardDocument
 
-    @State private var confirmationShown = false
-
     @State private var tag = ""
     @State private var symbol = ""
     

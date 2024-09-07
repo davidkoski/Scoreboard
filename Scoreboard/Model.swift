@@ -11,6 +11,17 @@ import SwiftUI
 struct Scoreboard : Codable {
     var tables = [String:Table]()
     var tags = [Tag]()
+    var primaryForHighScoreKey = [String:String]()
+    
+    init() {        
+    }
+    
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.tables = try container.decode([String : Table].self, forKey: .tables)
+        self.tags = try container.decode([Tag].self, forKey: .tags)
+        self.primaryForHighScoreKey = try container.decodeIfPresent([String : String].self, forKey: .primaryForHighScoreKey) ?? [:]
+    }
 }
 
 struct Score: Identifiable, Comparable, Hashable, Codable {
@@ -28,9 +39,12 @@ struct Score: Identifiable, Comparable, Hashable, Codable {
 struct Table : Identifiable, Comparable, Hashable, Codable {
     var id: String
     var name: String
-    var popperId: String?
+    var popperId: String
     var scores = [Score]()
     var tags = Set<String>()
+    
+    /// scores are saved under this key -- some other tables may also use this key, beware!
+    var highScoreKey: String?
     
     var sortKey: String {
         name
@@ -39,9 +53,31 @@ struct Table : Identifiable, Comparable, Hashable, Codable {
             .replacingOccurrences(of: "jp's ", with: "")
     }
     
+    init(table: VPinStudio.TableDetails) {
+        self.id = table.id
+        self.name = table.gameName
+        self.popperId = table.popperId
+        if table.isNVRam {
+            self.highScoreKey = table.rom
+        }
+    }
+    
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try container.decode(String.self, forKey: .id)
+        self.name = try container.decode(String.self, forKey: .name)
+        self.popperId = try container.decodeIfPresent(String.self, forKey: .popperId) ?? ""
+        if self.popperId == "" {
+            print(name)
+        }
+        self.scores = try container.decode([Score].self, forKey: .scores)
+        self.tags = try container.decode(Set<String>.self, forKey: .tags)
+        self.highScoreKey = try container.decodeIfPresent(String.self, forKey: .highScoreKey)
+    }
+    
     static func < (lhs: Table, rhs: Table) -> Bool {
         lhs.sortKey < rhs.sortKey
-    }
+    }    
 }
 
 struct Tag : Identifiable, Hashable, Codable {

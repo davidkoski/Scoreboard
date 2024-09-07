@@ -124,5 +124,5 @@ struct ScoreKeypad : View {
 }
 
 #Preview {
-    ScoreKeypad(score: .constant(.init(initials: "DAK", score: 1234)))
+    ScoreKeypad(score: .constant(.init(initials: OWNER_INITIALS, score: 1234)))
 }

@@ -31,6 +31,7 @@ struct ContentView : View {
             List {
                 NavigationLink("Recent", value: "Recent")
                 NavigationLink("Tables", value: "Tables")
+                NavigationLink("NVRam", value: "NVRam")
                 NavigationLink("Tags", value: "Tags")
             }
             .navigationDestination(for: String.self) { key in
@@ -39,6 +40,8 @@ struct ContentView : View {
                     RecentScoresView(document: document)
                 case "Tables":
                     TableSearchView(document: document)
+                case "NVRam":
+                    NVRamView(document: $document)
                 case "Tags":
                     TagListView(document: $document)
                 default:
@@ -46,7 +49,7 @@ struct ContentView : View {
                 }
             }
             .navigationDestination(for: Table.self) { table in
-                TableDetailView(table: tableBinding(table), tags: document.contents.tags)
+                TableDetailView(document: document, table: tableBinding(table), tags: document.contents.tags)
             }
             .navigationDestination(for: Tag.self) { tag in
                 let tables = document.contents.tables.values
@@ -56,12 +59,7 @@ struct ContentView : View {
             }
         }
         .toolbar {
-            Button(action: scanTables) {
-                Text("􀚁 Tables")
-            }
-            Button(action: scanScores) {
-                Text("􀚁 Scores")
-            }
+            VPinStudioScanner(document: $document, busy: $busy, current: $current, messages: $messages)
             Button(action: selectCurrent) {
                 Text("Current")
             }
@@ -101,101 +99,30 @@ struct ContentView : View {
         }
     }
     
-    private func scanTables() {
-        Task {
-            do {
-                busy = true
-                current = "Fetching tables..."
-                let tables = try await VPinStudio().getTablesList()
-                current = "Merging tables..."
-                for table in tables {
-                    if let existing = document.contents.tables[table.id] {
-                        if existing.name != table.gameName || existing.popperId == nil {
-                            messages.append("Rename \(existing.name) -> \(table.gameName)")
-                            document[existing].name = table.gameName
-                            document[existing].popperId = table.popperId
-                        }
-                    } else {
-                        messages.append("New \(table.gameName)")
-                        let new = Table(id: table.id, name: table.gameName, popperId: table.popperId)
-                        document[new] = new
-                    }
-                }
-            } catch {
-                print("Unable to scanTables: \(error)")
-            }
-            busy = false
-        }
-    }
-    
-    private func scanScores() {
-        Task {
-            do {
-                busy = true
-                let client = VPinStudio()
-                try await withThrowingTaskGroup(of: (Table, Score)?.self) { group in
-                    current = "Sending requests..."
-                    
-                    for table in document.contents.tables.values {
-                        if let id = table.popperId {
-                            group.addTask {
-                                let scores = try await client.getScores(id: id)
-                                if let best = bestScore(scores) {
-                                    // skip duplicates
-                                    if !table.scores.contains(where: { $0.score == best.numericScore }) {
-                                        return (table, .init(initials: "DAK", score: best.numericScore))
-                                    }
-                                }
-                                
-                                return nil
-                            }
-                        }
-                    }
-                    
-                    let count = document.contents.tables.count
-                    var i = 0
-                    
-                    for try await pair in group {
-                        i += 1
-                        current = "\(i)/\(count)"
-                        
-                        if let (table, score) = pair {
-                            messages.append("\(table.name): \(score.score)")
-                            document[table].scores.append(score)
-                            document[table].scores.sort()
-                        }
-                    }
-                }
-            } catch {
-                print("Unable to scanScores: \(error)")
-            }
-            busy = false
-        }
-    }
-
     private func selectCurrent() {
         Task {
             do {
-                guard let current = try await PinupPopper().currentTable() else {
+                guard let id = try await PinupPopper().currentTableId() else {
                     print("Unable to get current from PinupPopper")
                     return
                 }
-                let id = current.id
                 
-                await MainActor.run {
-                    let table: Table
-                    
-                    if var existing = document[id] {
-                        // backfill missing popperId
-                        if existing.popperId == nil {
-                            document[existing].popperId = current.gameID
-                            existing = document[existing]
-                        }
-                        table = existing
-                    } else {
-                        table = Table(id: current.id, name: current.trimmedName, popperId: current.gameID)
+                @MainActor
+                func find() -> Table? {
+                    if let table = document[id] {
+                        return table
                     }
                     
+                    for table in document.contents.tables.values {
+                        if table.popperId == id {
+                            return table
+                        }
+                    }
+                    
+                    return nil
+                }
+                
+                if let table = find() {
                     if !path.isEmpty {
                         path.removeLast()
                     }
