@@ -60,6 +60,9 @@ struct TableDetailView: View {
                         Spacer()
                         Text(table.name)
                             .font(.headline)
+
+                        scoreStatus
+
                         Spacer()
                     }
 
@@ -153,6 +156,20 @@ struct TableDetailView: View {
         }
         .onChange(of: table) {
             vpinManiaScores = nil
+        }
+    }
+
+    var scoreStatus: some View {
+        Group {
+            if table.scoreType != nil || table.scoreStatus != .ok {
+                Spacer().frame(width: 20)
+                Text(table.scoreStatus?.rawValue ?? "unknown")
+                    .italic()
+                if let scoreType = table.scoreType {
+                    Spacer().frame(width: 20)
+                    Text(scoreType)
+                }
+            }
         }
     }
 

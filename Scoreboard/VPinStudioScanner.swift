@@ -45,6 +45,11 @@ struct VPinStudioScanner: View {
                         if existing.highScoreKey == nil && table.isNVRam {
                             document[existing].highScoreKey = table.rom
                         }
+
+                        // fill in high score type (e.g. nvram etc.)
+                        if existing.scoreType == nil {
+                            document[existing].scoreType = table.highscoreType
+                        }
                     } else {
                         // new table
                         messages.append("New \(table.gameName)")
@@ -78,7 +83,8 @@ struct VPinStudioScanner: View {
             do {
                 busy = true
                 let client = VPinStudio()
-                try await withThrowingTaskGroup(of: (Table, Score)?.self) { group in
+                try await withThrowingTaskGroup(of: (Table, Score?, VPinStudio.ScoreStatus?)?.self)
+                { group in
                     current = "Sending requests..."
 
                     for table in document.contents.tables.values {
@@ -94,12 +100,28 @@ struct VPinStudioScanner: View {
                                         return (
                                             table,
                                             .init(
-                                                initials: OWNER_INITIALS, score: best.numericScore)
+                                                initials: OWNER_INITIALS, score: best.numericScore),
+                                            .ok
                                         )
+                                    } else {
+                                        // we had a score but chose not to use it
+                                        return (table, nil, .ok)
                                     }
+                                } else if table.scoreStatus == nil {
+                                    // no score, we don't know why (yet)
+                                    let status = try await client.getScoreStatusForEmptyScore(
+                                        id: id)
+                                    return (table, nil, status)
                                 }
 
                                 return nil
+                            }
+                        } else {
+                            // not the primary for the rom
+                            if table.scoreStatus != .duplicate {
+                                group.addTask {
+                                    return (table, nil, .duplicate)
+                                }
                             }
                         }
                     }
@@ -119,10 +141,18 @@ struct VPinStudioScanner: View {
                             nextUpdate = now + 0.25
                         }
 
-                        if let (table, score) = pair {
-                            messages.append("\(table.name): \(score.score)")
-                            document[table].scores.append(score)
-                            document[table].scores.sort()
+                        if let (table, score, scoreStatus) = pair {
+                            if let score {
+                                messages.append("\(table.name): \(score.score)")
+                                document[table].scoreStatus = .ok
+                                document[table].scores.append(score)
+                                document[table].scores.sort()
+                            } else if let scoreStatus {
+                                if scoreStatus != .ok {
+                                    messages.append("\(table.name): \(scoreStatus)")
+                                }
+                                document[table].scoreStatus = scoreStatus
+                            }
                         }
                     }
                 }

@@ -22,7 +22,11 @@ struct VPinStudio {
 
     let mediaURL = URL(string: "http://pinbot.local:8089/api/v1/poppermedia")!
 
+    /// read out existing score data
     let scoresURL = URL(string: "http://pinbot.local:8089/api/v1/games/scores")!
+
+    /// rescan scores -- report errors, e.g. No nvram file
+    let scanScoreURL = URL(string: "http://pinbot.local:8089/api/v1/games/scanscore")!
 
     let listURL = URL(string: "http://pinbot.local:8089/api/v1/games/knowns/-1")!
 
@@ -80,6 +84,68 @@ struct VPinStudio {
 
             return try JSONDecoder().decode(ScoresResponse.self, from: data)
                 .scores
+        } catch {
+            throw WrappedError(base: error, url: url)
+        }
+    }
+
+    enum ScoreStatus: String, Codable {
+        case ok
+
+        /// duplicate table for the rom
+        case duplicate
+
+        /// do not have a high score entry yet
+        case noScore = "no score"
+
+        /// Found VPReg entry, but no highscore entries in it
+        case empty
+
+        /// No nvram file, VPReg.stg entry or highscore text file found.
+        case noFile = "no file"
+
+        /// The NV ram file \"empsback.nv\" is not supported by PINemHi
+        case notSupported = "not supported"
+
+        case unknown
+    }
+
+    private struct ScanScoresResponse: Decodable {
+        // {"type":null,"displayName":null,"filename":null,"modified":null,"scanned":"2024-09-07T23:57:40.801+00:00","raw":null,"rom":"Great HOUDINI","status":"No nvram file, VPReg.stg entry or highscore text file found."}
+
+        let type: String?
+        let raw: String?
+        let status: String?
+
+        var disposition: ScoreStatus {
+            if let status {
+                if status.hasPrefix("Found VPReg entry, but no highscore entries in it") {
+                    return .empty
+                }
+                if status.hasPrefix("No nvram file") {
+                    return .noFile
+                }
+                if status.hasPrefix("The NV ram file") {
+                    return .notSupported
+                }
+
+                print("Unknown score status: \(status)")
+
+                return .unknown
+            }
+
+            return .noScore
+        }
+    }
+
+    public func getScoreStatusForEmptyScore(id: String) async throws -> ScoreStatus {
+        let url = scanScoreURL.appending(components: id)
+        do {
+            let request = URLRequest(url: url)
+            let (data, _) = try await URLSession.shared.data(for: request)
+
+            return try JSONDecoder().decode(ScanScoresResponse.self, from: data)
+                .disposition
         } catch {
             throw WrappedError(base: error, url: url)
         }

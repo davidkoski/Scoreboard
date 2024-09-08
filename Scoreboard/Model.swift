@@ -42,6 +42,8 @@ struct Table: Identifiable, Comparable, Hashable, Codable {
     var id: String
     var name: String
     var popperId: String
+    var scoreType: String?
+    var scoreStatus: VPinStudio.ScoreStatus?
     var scores = [Score]()
     var tags = Set<String>()
 
@@ -62,6 +64,7 @@ struct Table: Identifiable, Comparable, Hashable, Codable {
         if table.isNVRam {
             self.highScoreKey = table.rom
         }
+        self.scoreType = table.highscoreType
     }
 
     init(from decoder: any Decoder) throws {
@@ -73,6 +76,9 @@ struct Table: Identifiable, Comparable, Hashable, Codable {
             print(name)
         }
         self.scores = try container.decode([Score].self, forKey: .scores)
+        self.scoreType = try container.decodeIfPresent(String.self, forKey: .scoreType)
+        self.scoreStatus = try container.decodeIfPresent(
+            VPinStudio.ScoreStatus.self, forKey: .scoreStatus)
         self.tags = try container.decode(Set<String>.self, forKey: .tags)
         self.highScoreKey = try container.decodeIfPresent(String.self, forKey: .highScoreKey)
     }

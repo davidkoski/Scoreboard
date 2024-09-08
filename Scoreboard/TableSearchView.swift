@@ -19,6 +19,9 @@ struct TableListView: View {
                         Text(table.name)
                             .frame(width: 500, alignment: .leading)
 
+                        Text(table.scoreStatus?.rawValue ?? "-")
+                            .frame(width: 100, alignment: .leading)
+
                         if let score = table.scores.first {
                             Text(score.score.formatted())
                                 .frame(width: 250, alignment: .trailing)
