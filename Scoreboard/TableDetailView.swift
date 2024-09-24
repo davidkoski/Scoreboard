@@ -11,6 +11,10 @@ import SwiftUI
 struct TableDetailView: View {
 
     let document: ScoreboardDocument
+    
+    @Binding var path: NavigationPath
+    @Binding var search: String
+    
     @Binding var table: Table
     let tags: [Tag]
 
@@ -24,6 +28,9 @@ struct TableDetailView: View {
     @State var vpinManiaScores: [Score]?
 
     @State private var confirmationShown = false
+
+    @FocusState var searchFocused: Bool
+    @FocusState var viewFocused: Bool
 
     var hideWhileEditing: Bool {
         #if os(iOS)
@@ -140,6 +147,11 @@ struct TableDetailView: View {
                             }
                         }
                     }
+                    .focused($viewFocused)
+                    .task {
+                        // put focus on the view so cmd-f will work (as expected)
+                        viewFocused = true
+                    }
                 }
             }
         }
@@ -148,6 +160,25 @@ struct TableDetailView: View {
                 Text("VPin Mania")
             }
         }
+        
+        .searchable(text: $search)
+        .searchFocused($searchFocused)
+        .onSubmit(of: .search, {
+            path.removeLast(path.count)
+            path.append("Tables")
+        })
+        .onAppear {
+            // reset the search
+            search = ""
+        }
+        .onKeyPress { keypress in
+            if keypress.key == "f" && keypress.modifiers.contains(.command) {
+                searchFocused = true
+                return .handled
+            }
+            return .ignored
+        }
+        
         .task {
             isPrimaryForHighScore = document.isPrimaryForHighScore(table)
             if !isPrimaryForHighScore {

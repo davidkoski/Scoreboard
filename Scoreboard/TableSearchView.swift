@@ -38,8 +38,10 @@ struct TableListView: View {
 struct TableSearchView: View {
 
     let document: ScoreboardDocument
-
-    @State var search = ""
+    
+    @Binding var path: NavigationPath
+    @Binding var search: String
+    
     @State var items = [Table]()
 
     var body: some View {
@@ -80,6 +82,9 @@ struct TableSearchView: View {
                     table.name.lowercased().contains(terms)
                 }
                 .sorted()
+            if self.items.count == 1 {
+                path.append(self.items[0])
+            }
         }
     }
 

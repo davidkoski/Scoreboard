@@ -23,6 +23,11 @@ struct VPinStudioScanner: View {
         Button(action: scanScores) {
             Text("􀚁 Scores")
         }
+        .modifierKeyAlternate(.option) {
+            Button(action: resetScanScores) {
+                Text("􀚁 Reset + Scores")
+            }
+        }
     }
 
     private func scanTables() {
@@ -76,6 +81,15 @@ struct VPinStudioScanner: View {
             }
             busy = false
         }
+    }
+    
+    private func resetScanScores() {
+        for table in document.contents.tables.values {
+            if table.scoreStatus != .ok {
+                document[table].scoreStatus = nil
+            }
+        }
+        scanScores()
     }
 
     private func scanScores() {

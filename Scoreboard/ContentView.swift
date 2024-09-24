@@ -13,6 +13,7 @@ struct ContentView: View {
     @Binding var document: ScoreboardDocument
 
     @State var path = NavigationPath()
+    @State var search = ""
 
     @State var busy = false
     @State var current: String?
@@ -39,7 +40,7 @@ struct ContentView: View {
                 case "Recent":
                     RecentScoresView(document: document)
                 case "Tables":
-                    TableSearchView(document: document)
+                    TableSearchView(document: document, path: $path, search: $search)
                 case "NVRam":
                     NVRamView(document: $document)
                 case "Tags":
@@ -50,7 +51,8 @@ struct ContentView: View {
             }
             .navigationDestination(for: Table.self) { table in
                 TableDetailView(
-                    document: document, table: tableBinding(table), tags: document.contents.tags)
+                    document: document, path: $path, search: $search,
+                    table: tableBinding(table), tags: document.contents.tags)
             }
             .navigationDestination(for: Tag.self) { tag in
                 let tables = document.contents.tables.values
