@@ -7,8 +7,6 @@
 
 import Foundation
 
-// http://pinbot.local:8089/api/v1/poppermedia/124/Wheel
-
 func bestScore(_ scores: [VPinStudio.Score]) -> VPinStudio.Score? {
     Set(scores.filter { $0.playerInitials == OWNER_INITIALS && $0.numericScore > 0 }).sorted().last
 }
@@ -18,19 +16,28 @@ struct WrappedError: Error {
     let url: URL
 }
 
+/// Client for VPin Studio
+///
+/// - https://github.com/syd711/vpin-studio
+///
+/// This is for access to:
+///
+/// - scores
+/// - tables on the cabinet
+/// - vpin mania scores (global scoreboard)
 struct VPinStudio {
 
-    let mediaURL = URL(string: "http://pinbot.local:8089/api/v1/poppermedia")!
+    let mediaURL = URL(string: "\(CABINET_URL):\(VPIN_STUDIO_PORT)/api/v1/poppermedia")!
 
     /// read out existing score data
-    let scoresURL = URL(string: "http://pinbot.local:8089/api/v1/games/scores")!
+    let scoresURL = URL(string: "\(CABINET_URL):\(VPIN_STUDIO_PORT)/api/v1/games/scores")!
 
     /// rescan scores -- report errors, e.g. No nvram file
-    let scanScoreURL = URL(string: "http://pinbot.local:8089/api/v1/games/scanscore")!
+    let scanScoreURL = URL(string: "\(CABINET_URL):\(VPIN_STUDIO_PORT)/api/v1/games/scanscore")!
 
-    let listURL = URL(string: "http://pinbot.local:8089/api/v1/games/knowns/-1")!
+    let listURL = URL(string: "\(CABINET_URL):\(VPIN_STUDIO_PORT)/api/v1/games/knowns/-1")!
 
-    let detailsURL = URL(string: "http://pinbot.local:8089/api/v1/popper/tabledetails")!
+    let detailsURL = URL(string: "\(CABINET_URL):\(VPIN_STUDIO_PORT)/api/v1/popper/tabledetails")!
 
     let vpinManiaScoresURL = URL(string: "https://www.vpin-mania.net/api/highscores/table")!
 

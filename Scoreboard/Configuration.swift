@@ -8,3 +8,5 @@
 import Foundation
 
 public let OWNER_INITIALS = "DAK"
+public let CABINET_URL = "http://pinbot.local"
+public let VPIN_STUDIO_PORT = 8089

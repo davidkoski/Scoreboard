@@ -7,10 +7,15 @@
 
 import Foundation
 
+/// Interface to PinupPopper.
+///
+/// - https://www.nailbuster.com/wikipinup/doku.php?id=start
+///
+/// This can read the currently selected game and execute a search in the Popper UI.
 struct PinupPopper {
 
-    let getItem = URL(string: "http://pinbot.local/function/getcuritem")!
-    let search = URL(string: "http://pinbot.local/function/findgame")!
+    let getItem = URL(string: "\(CABINET_URL)/function/getcuritem")!
+    let search = URL(string: "\(CABINET_URL)/function/findgame")!
 
     struct Table: Decodable {
         let name: String

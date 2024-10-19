@@ -8,6 +8,9 @@
 import Foundation
 import SwiftUI
 
+/// Interface to pinball db (list of all available games).
+///
+/// - https://virtualpinballspreadsheet.github.io
 public actor PinballDB: ObservableObject {
 
     private let url = URL(
