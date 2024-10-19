@@ -15,7 +15,6 @@
 		C33173DA2C1F9AEA000D1058 /* ScoreboardDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = C33173D92C1F9AEA000D1058 /* ScoreboardDocument.swift */; };
 		C369813C2C15497000B4A704 /* VPinStudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = C369813B2C15497000B4A704 /* VPinStudio.swift */; };
 		C369813F2C1E38F400B4A704 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C369813E2C1E38F400B4A704 /* ContentView.swift */; };
-		C36981412C1E3BBA00B4A704 /* TagListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36981402C1E3BBA00B4A704 /* TagListView.swift */; };
 		C36981432C1E4C2900B4A704 /* ScoreEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36981422C1E4C2900B4A704 /* ScoreEntry.swift */; };
 		C3A4102E2C6EE33B00E47F63 /* VPinStudioScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3A4102D2C6EE33B00E47F63 /* VPinStudioScanner.swift */; };
 		C3A410302C6EE83C00E47F63 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3A4102F2C6EE83C00E47F63 /* Configuration.swift */; };
@@ -51,7 +50,6 @@
 		C369813B2C15497000B4A704 /* VPinStudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VPinStudio.swift; sourceTree = "<group>"; };
 		C369813D2C1CDE2E00B4A704 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		C369813E2C1E38F400B4A704 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		C36981402C1E3BBA00B4A704 /* TagListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagListView.swift; sourceTree = "<group>"; };
 		C36981422C1E4C2900B4A704 /* ScoreEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreEntry.swift; sourceTree = "<group>"; };
 		C3A4102D2C6EE33B00E47F63 /* VPinStudioScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VPinStudioScanner.swift; sourceTree = "<group>"; };
 		C3A4102F2C6EE83C00E47F63 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
@@ -154,7 +152,6 @@
 				C3D0AAE92C06AFBB00B8BD73 /* TableDetailView.swift */,
 				C36981422C1E4C2900B4A704 /* ScoreEntry.swift */,
 				C3D0AABE2C05593F00B8BD73 /* TableSearchView.swift */,
-				C36981402C1E3BBA00B4A704 /* TagListView.swift */,
 				C369813B2C15497000B4A704 /* VPinStudio.swift */,
 				C3D0AAD92C05758700B8BD73 /* Model.swift */,
 				C3D0AAC22C05594000B8BD73 /* Assets.xcassets */,
@@ -310,7 +307,6 @@
 				C3D0AADA2C05758700B8BD73 /* Model.swift in Sources */,
 				C3D0AAE42C057E0500B8BD73 /* PinballDB.swift in Sources */,
 				C3D0AACF2C055A6900B8BD73 /* Camera.swift in Sources */,
-				C36981412C1E3BBA00B4A704 /* TagListView.swift in Sources */,
 				C3D0AABF2C05593F00B8BD73 /* TableSearchView.swift in Sources */,
 				C33173DA2C1F9AEA000D1058 /* ScoreboardDocument.swift in Sources */,
 				C369813C2C15497000B4A704 /* VPinStudio.swift in Sources */,
@@ -506,7 +502,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Scoreboard/Preview Content\"";
-				DEVELOPMENT_TEAM = GD76UNBY73;
+				DEVELOPMENT_TEAM = S7CJ5V73AM;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Scoreboard/Info.plist;
@@ -546,7 +542,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Scoreboard/Preview Content\"";
-				DEVELOPMENT_TEAM = GD76UNBY73;
+				DEVELOPMENT_TEAM = S7CJ5V73AM;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Scoreboard/Info.plist;

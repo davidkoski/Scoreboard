@@ -42,7 +42,7 @@ struct PinupPopper {
         do {
             let request = URLRequest(url: getItem)
             let (data, _) = try await URLSession.shared.data(for: request)
-            
+
             if let table = try? JSONDecoder().decode(Table.self, from: data) {
                 return table.id
             }
@@ -52,9 +52,9 @@ struct PinupPopper {
             if let gameIdTable = try? JSONDecoder().decode(TableJustGameID.self, from: data) {
                 return gameIdTable.gameID.description
             }
-            
+
             return nil
-            
+
         } catch {
             throw WrappedError(base: error, url: getItem)
         }

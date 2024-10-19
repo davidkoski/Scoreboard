@@ -176,7 +176,7 @@ struct VPinStudio {
             self.gameName = try container.decode(String.self, forKey: CodingKeys.gameName)
             self.id = try container.decode(String.self, forKey: CodingKeys.id)
             self.popperId = try container.decode(Int.self, forKey: CodingKeys.popperId).description
-            self.rom = try container.decode(String.self, forKey: .rom)
+            self.rom = try container.decodeIfPresent(String.self, forKey: .rom) ?? ""
             self.highscoreType = try container.decodeIfPresent(String.self, forKey: .highscoreType)
         }
     }

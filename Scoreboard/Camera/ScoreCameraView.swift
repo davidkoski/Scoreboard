@@ -218,7 +218,7 @@ public struct ScoreCameraView: View {
                             await processedImages
                             .async
                             .compactMap {
-                                let image = ciContext.createCGImage($0, from: $0.extent)!
+                                let image = await ciContext.createCGImage($0, from: $0.extent)!
                                 if let (score, confidence) = await detect(image) {
                                     return (image, score, confidence)
                                 } else {

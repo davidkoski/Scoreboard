@@ -33,7 +33,6 @@ struct ContentView: View {
                 NavigationLink("Recent", value: "Recent")
                 NavigationLink("Tables", value: "Tables")
                 NavigationLink("NVRam", value: "NVRam")
-                NavigationLink("Tags", value: "Tags")
             }
             .navigationDestination(for: String.self) { key in
                 switch key {
@@ -43,8 +42,6 @@ struct ContentView: View {
                     TableSearchView(document: document, path: $path, search: $search)
                 case "NVRam":
                     NVRamView(document: $document)
-                case "Tags":
-                    TagListView(document: $document)
                 default:
                     EmptyView()
                 }
@@ -52,13 +49,7 @@ struct ContentView: View {
             .navigationDestination(for: Table.self) { table in
                 TableDetailView(
                     document: document, path: $path, search: $search,
-                    table: tableBinding(table), tags: document.contents.tags)
-            }
-            .navigationDestination(for: Tag.self) { tag in
-                let tables = document.contents.tables.values
-                    .filter { $0.tags.contains(tag.tag) }
-                    .sorted()
-                TableListView(tables: tables)
+                    table: tableBinding(table))
             }
         }
         .toolbar {

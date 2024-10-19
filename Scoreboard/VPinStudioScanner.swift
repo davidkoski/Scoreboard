@@ -82,7 +82,7 @@ struct VPinStudioScanner: View {
             busy = false
         }
     }
-    
+
     private func resetScanScores() {
         for table in document.contents.tables.values {
             if table.scoreStatus != .ok {

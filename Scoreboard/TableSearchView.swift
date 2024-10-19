@@ -38,10 +38,10 @@ struct TableListView: View {
 struct TableSearchView: View {
 
     let document: ScoreboardDocument
-    
+
     @Binding var path: NavigationPath
     @Binding var search: String
-    
+
     @State var items = [Table]()
 
     var body: some View {

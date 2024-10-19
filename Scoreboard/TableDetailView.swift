@@ -11,12 +11,11 @@ import SwiftUI
 struct TableDetailView: View {
 
     let document: ScoreboardDocument
-    
+
     @Binding var path: NavigationPath
     @Binding var search: String
-    
+
     @Binding var table: Table
-    let tags: [Tag]
 
     @State var showScore = false
     @State var showCamera = false
@@ -101,9 +100,6 @@ struct TableDetailView: View {
                         .buttonStyle(.plain)
                         .padding()
                         .disabled(showScore)
-
-                        // not really doing much with tags
-                        // tagsView()
                     }
                 }
             }
@@ -160,13 +156,16 @@ struct TableDetailView: View {
                 Text("VPin Mania")
             }
         }
-        
+
         .searchable(text: $search)
         .searchFocused($searchFocused)
-        .onSubmit(of: .search, {
-            path.removeLast(path.count)
-            path.append("Tables")
-        })
+        .onSubmit(
+            of: .search,
+            {
+                path.removeLast(path.count)
+                path.append("Tables")
+            }
+        )
         .onAppear {
             // reset the search
             search = ""
@@ -178,7 +177,7 @@ struct TableDetailView: View {
             }
             return .ignored
         }
-        
+
         .task {
             isPrimaryForHighScore = document.isPrimaryForHighScore(table)
             if !isPrimaryForHighScore {
@@ -202,43 +201,6 @@ struct TableDetailView: View {
                 }
             }
         }
-    }
-
-    private func tagsView() -> some View {
-        HStack {
-            ForEach(tags) { tag in
-                let selected = table.tags.contains(tag.tag)
-
-                #if os(iOS)
-                    let background = Color(white: 0.1)
-                #else
-                    let background = Color(white: 0.9)
-                #endif
-
-                display(tag: tag)
-                    .foregroundStyle(.black)
-                    .padding()
-                    .background {
-                        RoundedRectangle(cornerRadius: 8)
-                            .foregroundColor(selected ? .white : background)
-                        Circle()
-                            .foregroundStyle(selected ? .white : Color(white: 0.8))
-                            .padding(6)
-                    }
-                    .onTapGesture {
-                        if table.tags.contains(tag.tag) {
-                            table.tags.remove(tag.tag)
-                        } else {
-                            table.tags.insert(tag.tag)
-                        }
-                    }
-                    .help(tag.tag)
-            }
-        }
-        #if os(iOS)
-            .font(.system(size: 32))
-        #else
-        #endif
     }
 
     private func combinedScores() -> [Score] {

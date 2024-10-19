@@ -10,7 +10,6 @@ import SwiftUI
 
 struct Scoreboard: Codable {
     var tables = [String: Table]()
-    var tags = [Tag]()
     var primaryForHighScoreKey = [String: String]()
 
     init() {
@@ -19,7 +18,6 @@ struct Scoreboard: Codable {
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.tables = try container.decode([String: Table].self, forKey: .tables)
-        self.tags = try container.decode([Tag].self, forKey: .tags)
         self.primaryForHighScoreKey =
             try container.decodeIfPresent([String: String].self, forKey: .primaryForHighScoreKey)
             ?? [:]
@@ -45,7 +43,6 @@ struct Table: Identifiable, Comparable, Hashable, Codable {
     var scoreType: String?
     var scoreStatus: VPinStudio.ScoreStatus?
     var scores = [Score]()
-    var tags = Set<String>()
 
     /// scores are saved under this key -- some other tables may also use this key, beware!
     var highScoreKey: String?
@@ -79,42 +76,10 @@ struct Table: Identifiable, Comparable, Hashable, Codable {
         self.scoreType = try container.decodeIfPresent(String.self, forKey: .scoreType)
         self.scoreStatus = try container.decodeIfPresent(
             VPinStudio.ScoreStatus.self, forKey: .scoreStatus)
-        self.tags = try container.decode(Set<String>.self, forKey: .tags)
         self.highScoreKey = try container.decodeIfPresent(String.self, forKey: .highScoreKey)
     }
 
     static func < (lhs: Table, rhs: Table) -> Bool {
         lhs.sortKey < rhs.sortKey
-    }
-}
-
-struct Tag: Identifiable, Hashable, Codable {
-    var tag: String
-    var symbol: String?
-
-    var id: String { tag }
-}
-
-@ViewBuilder
-func display(tag: Tag) -> some View {
-    if let symbol = tag.symbol, !symbol.isEmpty {
-        display(symbol: symbol)
-    } else {
-        Text(tag.tag)
-    }
-}
-
-func display(symbol: String?) -> some View {
-    Group {
-        if let symbol {
-            switch symbol.count {
-            case 0:
-                EmptyView()
-            case 1:
-                Text(symbol)
-            default:
-                Image(systemName: symbol)
-            }
-        }
     }
 }
