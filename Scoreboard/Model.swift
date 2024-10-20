@@ -67,7 +67,11 @@ struct ScoreModel: Codable {
     }
 
     public func hasMisconfiguredScores(_ table: Table) -> Bool {
-        scores[table.scoreId]?.webId != table.webId
+        if let scores = scores[table.scoreId] {
+            scores.webId != table.webId
+        } else {
+            false
+        }
     }
 
     public mutating func setScoresWebId(_ table: Table) {
@@ -201,6 +205,9 @@ struct Table: Identifiable, Comparable, Hashable, Codable {
 
     var scoreType: VPinStudio.HighScoreType?
     var scoreStatus: VPinStudio.ScoreStatus?
+
+    var comparableScoreStatus: VPinStudio.ScoreStatus { scoreStatus ?? .unknown }
+    var comparableScoreType: VPinStudio.HighScoreType { scoreType ?? .na }
 
     /// table is disabled in the cabinet
     var disabled: Bool

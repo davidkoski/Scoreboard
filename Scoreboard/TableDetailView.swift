@@ -65,7 +65,7 @@ struct TableDetailView: View {
                 VStack {
                     HStack {
                         Spacer()
-                        Text(table.name)
+                        Text(table.longDisplayName)
                             .font(.headline)
 
                         scoreStatus
@@ -77,7 +77,7 @@ struct TableDetailView: View {
                         HStack {
                             Spacer()
                             Text("Primary for NVRam: ")
-                            Text(primaryForHighScore.name)
+                            Text(primaryForHighScore.longDisplayName)
                             Spacer()
                         }
                     }
@@ -100,7 +100,7 @@ struct TableDetailView: View {
                         }
                         .buttonStyle(.plain)
                         .padding()
-                        .disabled(showScore)
+                        .disabled(showScore || !isPrimaryForHighScore)
                     }
                 }
             }
@@ -152,6 +152,7 @@ struct TableDetailView: View {
                 }
             }
         }
+        .padding()
         .toolbar {
             Button(action: showVpinMania) {
                 Text("VPin Mania")

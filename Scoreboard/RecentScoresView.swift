@@ -8,25 +8,22 @@
 import Foundation
 import SwiftUI
 
-struct ScoreTable: Identifiable, Comparable {
+struct ScoreTable: Identifiable {
     let score: Score
     let table: Table
-    var id: Date { score.date }
-
-    static func < (lhs: ScoreTable, rhs: ScoreTable) -> Bool {
-        lhs.score.date > rhs.score.date
-    }
+    var id = UUID()
 }
 
 struct RecentScoresView: View {
 
     let document: ScoreboardDocument
 
-    @State var scores = [ScoreTable]()
+    @State private var scores = [ScoreTable]()
+    @State private var sortOrder = [KeyPathComparator(\ScoreTable.score.date)]
 
     var body: some View {
-        SwiftUI.Table(scores) {
-            TableColumn("Table") { st in
+        SwiftUI.Table(scores, sortOrder: $sortOrder) {
+            TableColumn("Table", value: \.table.name) { st in
                 NavigationLink(value: st.table) {
                     Text(st.table.name)
                 }
@@ -36,12 +33,15 @@ struct RecentScoresView: View {
             TableColumn("Initials", value: \.score.initials)
                 .width(min: 50, max: 50)
 
-            TableColumn("Score") { st in
+            TableColumn("Score", value: \.score) { st in
                 Text(st.score.score.formatted())
             }
-            TableColumn("Date") { st in
+            TableColumn("Date", value: \.score.date) { st in
                 Text(st.score.date.formatted())
             }
+        }
+        .onChange(of: sortOrder) {
+            scores.sort(using: sortOrder)
         }
         .task {
             var result = [ScoreTable]()
@@ -57,7 +57,7 @@ struct RecentScoresView: View {
                 }
             }
 
-            self.scores = result.sorted()
+            self.scores = result.sorted(using: sortOrder)
         }
     }
 }

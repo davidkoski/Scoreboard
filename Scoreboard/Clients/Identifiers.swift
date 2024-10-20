@@ -108,7 +108,7 @@ public struct ScoreId: Codable, Hashable, Sendable, Identifiable, Comparable,
         case .vpreg:
             self.name = table.rom
             self.offset = 0
-        case .none:
+        case .none, .na:
             self.name = table.webId.id
             self.offset = -1
         }

@@ -10,30 +10,38 @@ import SwiftUI
 struct TableListView: View {
 
     let document: ScoreboardDocument
-    let tables: [Table]
+    @Binding var tables: [Table]
+
+    @State private var sortOrder = [KeyPathComparator(\Table.name)]
 
     var body: some View {
-        List {
-            ForEach(tables) { table in
+        SwiftUI.Table(tables, sortOrder: $sortOrder) {
+            TableColumn("Table", value: \.name) { table in
                 NavigationLink(value: table) {
-                    HStack {
-                        Text(table.name)
-                            .frame(width: 500, alignment: .leading)
-
-                        Text(table.scoreStatus?.rawValue ?? "-")
-                            .frame(width: 100, alignment: .leading)
-
-                        if let score = document.contents[table.scoreId]?.entries.first {
-                            Text(score.score.formatted())
-                                .frame(width: 250, alignment: .trailing)
-                        }
-                    }
+                    Text(table.name)
                 }
             }
-        }
-        .frame(minWidth: 200)
-    }
+            .width(min: 200)
 
+            TableColumn("Status", value: \.comparableScoreStatus) { table in
+                Text(table.scoreStatus?.rawValue ?? "-")
+            }
+            TableColumn("Type", value: \.comparableScoreType) { table in
+                Text(table.scoreType?.rawValue ?? "-")
+            }
+            TableColumn("Score") { table in
+                let score = document.contents[table.scoreId]?.entries.first?.score
+                Text(score?.formatted() ?? "-")
+            }
+            TableColumn("Count") { table in
+                let count = document.contents[table.scoreId]?.entries.count
+                Text(count?.formatted() ?? "-")
+            }
+        }
+        .onChange(of: sortOrder) {
+            tables.sort(using: sortOrder)
+        }
+    }
 }
 
 struct TableSearchView: View {
@@ -47,7 +55,7 @@ struct TableSearchView: View {
 
     var body: some View {
         VStack {
-            TableListView(document: document, tables: items)
+            TableListView(document: document, tables: $items)
         }
         .toolbar {
             Button(action: applySearch) {

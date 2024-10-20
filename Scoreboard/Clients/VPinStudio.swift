@@ -96,7 +96,7 @@ public struct VPinStudio {
         }
     }
 
-    public enum ScoreStatus: String, Codable {
+    public enum ScoreStatus: String, Codable, Comparable {
         case ok
 
         /// duplicate table for the rom
@@ -115,6 +115,22 @@ public struct VPinStudio {
         case notSupported = "not supported"
 
         case unknown
+
+        private var sortOrder: Int {
+            switch self {
+            case .ok: return 0
+            case .duplicate: return 1
+            case .noScore: return 2
+            case .empty: return 3
+            case .noFile: return 4
+            case .notSupported: return 5
+            case .unknown: return 6
+            }
+        }
+
+        public static func < (lhs: VPinStudio.ScoreStatus, rhs: VPinStudio.ScoreStatus) -> Bool {
+            lhs.sortOrder < rhs.sortOrder
+        }
     }
 
     private struct ScanScoresResponse: Decodable {
@@ -158,10 +174,24 @@ public struct VPinStudio {
         }
     }
 
-    public enum HighScoreType: String, Codable {
+    public enum HighScoreType: String, Codable, Comparable {
         case nvram = "NVRam"
         case em = "EM"
         case vpreg = "VPReg"
+        case na = "N/A"
+
+        private var sortOrder: Int {
+            switch self {
+            case .nvram: return 0
+            case .em: return 1
+            case .vpreg: return 2
+            case .na: return 3
+            }
+        }
+
+        public static func < (lhs: HighScoreType, rhs: HighScoreType) -> Bool {
+            lhs.sortOrder < rhs.sortOrder
+        }
     }
 
     public struct TableDetails: Decodable {
