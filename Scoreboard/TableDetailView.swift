@@ -16,6 +16,7 @@ struct TableDetailView: View {
     @Binding var search: String
 
     @Binding var table: Table
+    @Binding var scores: TableScoreboard
 
     @State var showScore = false
     @State var showCamera = false
@@ -51,7 +52,7 @@ struct TableDetailView: View {
         VStack {
             HStack {
                 if !hideWhileEditing {
-                    AsyncImage(url: VPinStudio().wheelImageURL(id: table.popperId)) { image in
+                    AsyncImage(url: VPinStudio().wheelImageURL(id: table.cabinetId)) { image in
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fit)
@@ -139,7 +140,7 @@ struct TableDetailView: View {
                         }
                         .onDelete { indexes in
                             if let index = indexes.first {
-                                delete(score: table.scores[index])
+                                delete(score: scores.entries[index])
                             }
                         }
                     }
@@ -179,9 +180,10 @@ struct TableDetailView: View {
         }
 
         .task {
-            isPrimaryForHighScore = document.isPrimaryForHighScore(table)
-            if !isPrimaryForHighScore {
-                primaryForHighScore = document.primaryForHighScore(table)
+            // if we can't collect the score, indicate which table is primary
+            if document.contents.hasMisconfiguredScores(table) {
+                isPrimaryForHighScore = false
+                primaryForHighScore = document.contents.representative(table.scoreId)
             }
         }
         .onChange(of: table) {
@@ -197,7 +199,7 @@ struct TableDetailView: View {
                     .italic()
                 if let scoreType = table.scoreType {
                     Spacer().frame(width: 20)
-                    Text(scoreType)
+                    Text(scoreType.rawValue)
                 }
             }
         }
@@ -205,16 +207,16 @@ struct TableDetailView: View {
 
     private func combinedScores() -> [Score] {
         if let vpinManiaScores {
-            (table.scores + vpinManiaScores).sorted()
+            (scores.entries + vpinManiaScores).sorted()
         } else {
-            table.scores.sorted()
+            scores.entries.sorted()
         }
     }
 
     private func showVpinMania() {
         Task {
             do {
-                let scores = try await VPinStudio().getVPinManiaScores(id: table.id)
+                let scores = try await VPinStudio().getVPinManiaScores(id: table.webId)
 
                 withAnimation {
                     self.vpinManiaScores =
@@ -236,7 +238,7 @@ struct TableDetailView: View {
     @MainActor
     private func delete(score: Score) {
         withAnimation {
-            table.scores.removeAll { $0 == score }
+            scores.remove(score)
         }
     }
 
@@ -263,8 +265,7 @@ struct TableDetailView: View {
 
     @MainActor
     private func saveScore(_ score: Score) {
-        table.scores.append(score)
-        table.scores.sort()
+        scores.add(score)
     }
 
     @MainActor
@@ -284,13 +285,18 @@ struct TableDetailView: View {
     }
 
     private func downloadScores() {
-        let id = table.popperId
+        let id = table.cabinetId
+
+        if document.contents.hasMisconfiguredScores(table) {
+            // the score can't be saved with the scoreId
+            return
+        }
 
         Task {
             let allScores = try await VPinStudio().getScores(id: id)
 
             if let best = bestScore(allScores) {
-                if !table.scores.contains(where: { $0.score == best.numericScore }) {
+                if !scores.entries.contains(where: { $0.score == best.numericScore }) {
                     await MainActor.run {
                         withAnimation {
                             saveScore(.init(initials: OWNER_INITIALS, score: best.numericScore))

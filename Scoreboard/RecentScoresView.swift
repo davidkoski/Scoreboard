@@ -44,20 +44,20 @@ struct RecentScoresView: View {
             }
         }
         .task {
-            var scores = [ScoreTable]()
+            var result = [ScoreTable]()
             let recent = Date() - 3 * 24 * 3600
 
-            for table in document.contents.tables.values {
-                let recentScores = table.scores.filter { $0.date > recent }
-                if !recentScores.isEmpty {
-                    scores.append(
+            for (id, scores) in document.contents.scores {
+                let recentScores = scores.entries.filter { $0.date > recent }
+                if !recentScores.isEmpty, let table = document.contents.representative(id) {
+                    result.append(
                         contentsOf:
                             recentScores.map { ScoreTable(score: $0, table: table) }
                     )
                 }
             }
 
-            self.scores = scores.sorted()
+            self.scores = result.sorted()
         }
     }
 }

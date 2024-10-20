@@ -25,7 +25,7 @@ struct WrappedError: Error {
 /// - scores
 /// - tables on the cabinet
 /// - vpin mania scores (global scoreboard)
-struct VPinStudio {
+public struct VPinStudio {
 
     let mediaURL = URL(string: "\(CABINET_URL):\(VPIN_STUDIO_PORT)/api/v1/poppermedia")!
 
@@ -41,8 +41,8 @@ struct VPinStudio {
 
     let vpinManiaScoresURL = URL(string: "https://www.vpin-mania.net/api/highscores/table")!
 
-    public func wheelImageURL(id: String) -> URL {
-        mediaURL.appending(components: id, "Wheel")
+    public func wheelImageURL(id: CabinetTableId) -> URL {
+        mediaURL.appending(components: id.id, "Wheel")
     }
 
     public struct Score: Decodable, Hashable, Comparable {
@@ -83,8 +83,8 @@ struct VPinStudio {
         let scores: [Score]
     }
 
-    public func getScores(id: String) async throws -> [Score] {
-        let url = scoresURL.appending(components: id)
+    public func getScores(id: CabinetTableId) async throws -> [Score] {
+        let url = scoresURL.appending(components: id.id)
         do {
             let request = URLRequest(url: url)
             let (data, _) = try await URLSession.shared.data(for: request)
@@ -96,7 +96,7 @@ struct VPinStudio {
         }
     }
 
-    enum ScoreStatus: String, Codable {
+    public enum ScoreStatus: String, Codable {
         case ok
 
         /// duplicate table for the rom
@@ -145,8 +145,8 @@ struct VPinStudio {
         }
     }
 
-    public func getScoreStatusForEmptyScore(id: String) async throws -> ScoreStatus {
-        let url = scanScoreURL.appending(components: id)
+    public func getScoreStatusForEmptyScore(id: CabinetTableId) async throws -> ScoreStatus {
+        let url = scanScoreURL.appending(components: id.id)
         do {
             let request = URLRequest(url: url)
             let (data, _) = try await URLSession.shared.data(for: request)
@@ -158,22 +158,42 @@ struct VPinStudio {
         }
     }
 
-    public struct TableDetails: Decodable {
-        let id: String
-        let gameName: String
-        let popperId: String
-        let rom: String
-        let highscoreType: String?
+    public enum HighScoreType: String, Codable {
+        case nvram = "NVRam"
+        case em = "EM"
+        case vpreg = "VPReg"
+    }
 
-        /// true if this uses nvram high scoring -- in particular the high scores are per rom name
-        var isNVRam: Bool { highscoreType == "NVRam" }
+    public struct TableDetails: Decodable {
+        /// unique identifier for table, e.g. sMBqx5fp.  This is the identifier from the ``PinballDB``
+        let webId: WebTableId
+
+        /// short name, e.g. 2001 (Gottlieb 1971)
+        let gameName: String
+
+        /// long name, e.g. 2001 (Gottlieb 1971) Wrd1972 0.99a
+        let gameDisplayName: String?
+
+        /// numeric identifier (row id) for cabinet database
+        let cabinetId: CabinetTableId
+        let highscoreType: HighScoreType?
+
+        let rom: String
+        let hsFileName: String?
+        let nvOffset: Int
+
+        let disabled: Bool
 
         enum CodingKeys: String, CodingKey {
             case gameName
+            case gameDisplayName
             case id = "extTableId"
             case popperId = "id"
             case rom
+            case hsFileName
+            case nvOffset
             case highscoreType
+            case disabled
         }
 
         public init(from decoder: any Decoder) throws {
@@ -181,11 +201,20 @@ struct VPinStudio {
                 keyedBy: CodingKeys.self)
 
             self.gameName = try container.decode(String.self, forKey: CodingKeys.gameName)
-            self.id = try container.decode(String.self, forKey: CodingKeys.id)
-            self.popperId = try container.decode(Int.self, forKey: CodingKeys.popperId).description
+            self.gameDisplayName = try container.decode(String.self, forKey: .gameDisplayName)
+            self.webId = try container.decode(WebTableId.self, forKey: CodingKeys.id)
+            self.cabinetId = try container.decode(CabinetTableId.self, forKey: CodingKeys.popperId)
+            self.highscoreType = try container.decodeIfPresent(
+                HighScoreType.self, forKey: .highscoreType)
+
             self.rom = try container.decodeIfPresent(String.self, forKey: .rom) ?? ""
-            self.highscoreType = try container.decodeIfPresent(String.self, forKey: .highscoreType)
+            self.hsFileName = try container.decodeIfPresent(String.self, forKey: .hsFileName)
+            self.nvOffset = try container.decode(Int.self, forKey: .nvOffset)
+
+            self.disabled = try container.decode(Bool.self, forKey: .disabled)
         }
+
+        var scoreId: ScoreId { ScoreId(self) }
     }
 
     public func getTablesList() async throws -> [TableDetails] {
@@ -195,23 +224,6 @@ struct VPinStudio {
         return try JSONDecoder().decode([TableDetails].self, from: data)
     }
 
-    public struct TableDetailsShort: Codable {
-        let gameName: String
-        let id: String
-
-        enum CodingKeys: String, CodingKey {
-            case gameName
-            case id = "webGameId"
-        }
-    }
-
-    public func getDetailsShort(id: String) async throws -> TableDetailsShort {
-        let request = URLRequest(url: detailsURL.appending(components: id))
-        let (data, _) = try await URLSession.shared.data(for: request)
-
-        return try JSONDecoder().decode(TableDetailsShort.self, from: data)
-    }
-
     public struct VPinManiaScore: Decodable {
         let score: Int
         let initials: String
@@ -219,8 +231,8 @@ struct VPinStudio {
         let creationDate: Date
     }
 
-    public func getVPinManiaScores(id: String) async throws -> [VPinManiaScore] {
-        let request = URLRequest(url: vpinManiaScoresURL.appending(components: id))
+    public func getVPinManiaScores(id: WebTableId) async throws -> [VPinManiaScore] {
+        let request = URLRequest(url: vpinManiaScoresURL.appending(components: id.description))
         let (data, _) = try await URLSession.shared.data(for: request)
 
         // 2024-07-30 03:58:39

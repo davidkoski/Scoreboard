@@ -27,12 +27,20 @@ struct ContentView: View {
         }
     }
 
+    func scoreBinding(_ table: Table) -> Binding<TableScoreboard> {
+        Binding {
+            document.contents[score: table]
+        } set: { newValue in
+            document.contents[score: table] = newValue
+        }
+    }
+
     var body: some View {
         NavigationStack(path: $path) {
             List {
                 NavigationLink("Recent", value: "Recent")
                 NavigationLink("Tables", value: "Tables")
-                NavigationLink("NVRam", value: "NVRam")
+                NavigationLink("Duplicates", value: "Duplicates")
             }
             .navigationDestination(for: String.self) { key in
                 switch key {
@@ -40,8 +48,8 @@ struct ContentView: View {
                     RecentScoresView(document: document)
                 case "Tables":
                     TableSearchView(document: document, path: $path, search: $search)
-                case "NVRam":
-                    NVRamView(document: $document)
+                case "Duplicates":
+                    DuplicatesView(document: $document)
                 default:
                     EmptyView()
                 }
@@ -49,7 +57,7 @@ struct ContentView: View {
             .navigationDestination(for: Table.self) { table in
                 TableDetailView(
                     document: document, path: $path, search: $search,
-                    table: tableBinding(table))
+                    table: tableBinding(table), scores: scoreBinding(table))
             }
         }
         .toolbar {
@@ -94,6 +102,7 @@ struct ContentView: View {
         }
     }
 
+    @MainActor
     private func selectCurrent() {
         Task {
             do {
@@ -102,22 +111,7 @@ struct ContentView: View {
                     return
                 }
 
-                @MainActor
-                func find() -> Table? {
-                    if let table = document[id] {
-                        return table
-                    }
-
-                    for table in document.contents.tables.values {
-                        if table.popperId == id {
-                            return table
-                        }
-                    }
-
-                    return nil
-                }
-
-                if let table = find() {
+                if let table = document[id] {
                     if !path.isEmpty {
                         path.removeLast()
                     }

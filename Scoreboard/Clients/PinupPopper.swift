@@ -19,8 +19,8 @@ struct PinupPopper {
 
     struct Table: Decodable {
         let name: String
-        let id: String
-        let gameID: String
+        let id: WebTableId
+        let gameID: CabinetTableId
 
         var trimmedName: String {
             name
@@ -36,26 +36,26 @@ struct PinupPopper {
     }
 
     private struct TableJustGameID: Decodable {
-        let gameID: Int
+        let gameID: CabinetTableId
 
         enum CodingKeys: String, CodingKey {
             case gameID = "GameID"
         }
     }
 
-    public func currentTableId() async throws -> String? {
+    public func currentTableId() async throws -> CabinetTableId? {
         do {
             let request = URLRequest(url: getItem)
             let (data, _) = try await URLSession.shared.data(for: request)
 
             if let table = try? JSONDecoder().decode(Table.self, from: data) {
-                return table.id
+                return table.gameID
             }
 
             // if the game is not running but is selected in popper we only have
             // the gameId (primary key in the popper db)
             if let gameIdTable = try? JSONDecoder().decode(TableJustGameID.self, from: data) {
-                return gameIdTable.gameID.description
+                return gameIdTable.gameID
             }
 
             return nil

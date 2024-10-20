@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TableListView: View {
 
+    let document: ScoreboardDocument
     let tables: [Table]
 
     var body: some View {
@@ -22,7 +23,7 @@ struct TableListView: View {
                         Text(table.scoreStatus?.rawValue ?? "-")
                             .frame(width: 100, alignment: .leading)
 
-                        if let score = table.scores.first {
+                        if let score = document.contents[table.scoreId]?.entries.first {
                             Text(score.score.formatted())
                                 .frame(width: 250, alignment: .trailing)
                         }
@@ -46,7 +47,7 @@ struct TableSearchView: View {
 
     var body: some View {
         VStack {
-            TableListView(tables: items)
+            TableListView(document: document, tables: items)
         }
         .toolbar {
             Button(action: applySearch) {

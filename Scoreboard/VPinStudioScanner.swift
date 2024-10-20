@@ -38,46 +38,34 @@ struct VPinStudioScanner: View {
                 let tables = try await VPinStudio().getTablesList()
                 current = "Merging tables..."
                 for table in tables {
-                    if let existing = document.contents.tables[table.id] {
-                        // existing, see if it needs updating
-                        if existing.name != table.gameName || existing.popperId == "" {
-                            messages.append("Rename \(existing.name) -> \(table.gameName)")
-                            document[existing].name = table.gameName
-                            document[existing].popperId = table.popperId
-                        }
-
-                        // if we didn't pick up the rom name do so now
-                        if existing.highScoreKey == nil && table.isNVRam {
-                            document[existing].highScoreKey = table.rom
-                        }
-
-                        // fill in high score type (e.g. nvram etc.)
-                        if existing.scoreType == nil {
-                            document[existing].scoreType = table.highscoreType
+                    if let existing = document.contents[table.cabinetId] {
+                        if document[existing].update(table) {
+                            messages.append("Update \(existing.longDisplayName)")
                         }
                     } else {
                         // new table
-                        messages.append("New \(table.gameName)")
                         let new = Table(table: table)
+                        messages.append("New \(new.longDisplayName)")
                         document[new] = new
                     }
                 }
 
-                // count how many have each distinct high score type
-                let tablesByHighScoreKey = Dictionary(
-                    grouping: document.contents.tables.values
-                        .filter { $0.highScoreKey != nil },
-                    by: { $0.highScoreKey! }
-                )
-                .filter { $0.value.count == 1 }
+                // any tables that no longer appear are deleted and can be marked as disabled
+                var tableIds = Set(document.contents.tables.keys)
+                for table in tables {
+                    tableIds.remove(table.cabinetId)
+                }
 
-                // and mark anything primary that we can
-                for (_, tables) in tablesByHighScoreKey {
-                    document.setIsPrimaryForHighScore(tables[0])
+                for tableId in tableIds {
+                    document[tableId]?.disabled = true
+                    if let table = document[tableId] {
+                        messages.append("Deleted (disabled) \(table.longDisplayName)")
+                    }
                 }
 
             } catch {
                 print("Unable to scanTables: \(error)")
+                messages.append("Failed: \(error)")
             }
             busy = false
         }
@@ -102,41 +90,33 @@ struct VPinStudioScanner: View {
                     current = "Sending requests..."
 
                     for table in document.contents.tables.values {
-                        let id = table.popperId
-                        if document.isPrimaryForHighScore(table) {
-                            group.addTask {
-                                let scores = try await client.getScores(id: id)
-                                if let best = bestScore(scores) {
-                                    // skip duplicates
-                                    if !table.scores.contains(where: {
-                                        $0.score == best.numericScore
-                                    }) {
-                                        return (
-                                            table,
-                                            .init(
-                                                initials: OWNER_INITIALS, score: best.numericScore),
-                                            .ok
-                                        )
-                                    } else {
-                                        // we had a score but chose not to use it
-                                        return (table, nil, .ok)
-                                    }
-                                } else if table.scoreStatus == nil {
-                                    // no score, we don't know why (yet)
-                                    let status = try await client.getScoreStatusForEmptyScore(
-                                        id: id)
-                                    return (table, nil, status)
-                                }
 
+                        group.addTask {
+                            if table.disabled {
+                                // skip -- disabled or deleted
                                 return nil
                             }
-                        } else {
-                            // not the primary for the rom
-                            if table.scoreStatus != .duplicate {
-                                group.addTask {
-                                    return (table, nil, .duplicate)
-                                }
+                            if await document.contents.hasMisconfiguredScores(table) {
+                                // table does not
+                                return nil
                             }
+
+                            let scores = try await client.getScores(id: table.cabinetId)
+                            if let best = bestScore(scores) {
+                                return (
+                                    table,
+                                    .init(
+                                        initials: OWNER_INITIALS, score: best.numericScore),
+                                    .ok
+                                )
+                            } else if table.scoreStatus == nil {
+                                // no score, we don't know why (yet)
+                                let status = try await client.getScoreStatusForEmptyScore(
+                                    id: table.cabinetId)
+                                return (table, nil, status)
+                            }
+
+                            return nil
                         }
                     }
 
@@ -157,10 +137,10 @@ struct VPinStudioScanner: View {
 
                         if let (table, score, scoreStatus) = pair {
                             if let score {
-                                messages.append("\(table.name): \(score.score)")
-                                document[table].scoreStatus = .ok
-                                document[table].scores.append(score)
-                                document[table].scores.sort()
+                                if document.contents[score: table].add(score) {
+                                    messages.append("\(table.name): \(score.score)")
+                                    document[table].scoreStatus = .ok
+                                }
                             } else if let scoreStatus {
                                 if scoreStatus != .ok {
                                     messages.append("\(table.name): \(scoreStatus)")
@@ -172,6 +152,7 @@ struct VPinStudioScanner: View {
                 }
             } catch {
                 print("Unable to scanScores: \(error)")
+                messages.append("failed: \(error)")
             }
             busy = false
         }
