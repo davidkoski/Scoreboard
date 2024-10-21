@@ -121,15 +121,24 @@ struct ScoreModel: Codable {
                 tablesByScoreId[new.scoreId, default: []].append(new)
             }
         }
-        if let old, let new {
-            if old.scoreId != new.scoreId && old.scoreId.isManual {
-                // changing the scoreId and the old one was manual -- move it to the new
-                // scoreId
+        if let old, let new, old.scoreId != new.scoreId {
+
+            func move() {
                 if var scoreboard = scores[old.scoreId] {
                     scoreboard.webId = new.webId
                     scores[new.scoreId] = scoreboard
                     scores.removeValue(forKey: old.scoreId)
                 }
+            }
+
+            if old.scoreId.isManual {
+                // changing the scoreId and the old one was manual -- move it to the new scoreId
+                move()
+            } else if let scores = scores[old.scoreId], scores.webId == old.webId {
+                // the scoreId changed (maybe the offset changed) and the scores
+                // match the webId (overall table) of the item that is moving
+                // so move the scores too
+                move()
             }
         }
     }

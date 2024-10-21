@@ -157,6 +157,9 @@ struct TableDetailView: View {
             Button(action: showVpinMania) {
                 Text("VPin Mania")
             }
+            Button(action: showInCabinet) {
+                Text("Show In Cabinet")
+            }
         }
 
         .searchable(text: $search)
@@ -182,8 +185,8 @@ struct TableDetailView: View {
 
         .task {
             // if we can't collect the score, indicate which table is primary
-            if document.contents.hasMisconfiguredScores(table) {
-                isPrimaryForHighScore = false
+            isPrimaryForHighScore = !document.contents.hasMisconfiguredScores(table)
+            if !isPrimaryForHighScore {
                 primaryForHighScore = document.contents.representative(table.scoreId)
             }
         }
@@ -233,6 +236,12 @@ struct TableDetailView: View {
             } catch {
                 print("Error fetching vpin mania scores: \(error)")
             }
+        }
+    }
+
+    private func showInCabinet() {
+        Task {
+            try await PinupPopper().search(table.name)
         }
     }
 

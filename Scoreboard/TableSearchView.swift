@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+// TODO: indicate disabled, maybe make score data sortable
+
 struct TableListView: View {
 
     let document: ScoreboardDocument
@@ -58,8 +60,8 @@ struct TableSearchView: View {
             TableListView(document: document, tables: $items)
         }
         .toolbar {
-            Button(action: applySearch) {
-                Text("Search Pinbot")
+            Button(action: showInCabinet) {
+                Text("Search Cabinet")
             }
         }
         .searchable(text: $search)
@@ -75,7 +77,7 @@ struct TableSearchView: View {
         }
     }
 
-    private func applySearch() {
+    private func showInCabinet() {
         Task {
             try await PinupPopper().search(search)
         }

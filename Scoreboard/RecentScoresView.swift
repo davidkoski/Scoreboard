@@ -19,7 +19,7 @@ struct RecentScoresView: View {
     let document: ScoreboardDocument
 
     @State private var scores = [ScoreTable]()
-    @State private var sortOrder = [KeyPathComparator(\ScoreTable.score.date)]
+    @State private var sortOrder = [KeyPathComparator(\ScoreTable.score.date, order: .reverse)]
 
     var body: some View {
         SwiftUI.Table(scores, sortOrder: $sortOrder) {
