@@ -7,41 +7,66 @@
 
 import SwiftUI
 
-// TODO: indicate disabled, maybe make score data sortable
+private struct TableItem: Identifiable {
+    let table: Table
+    let scoreCount: Int
+    let score: Int
+    
+    var id: CabinetTableId { table.id }
+    
+    init(table: Table, document: ScoreboardDocument) {
+        self.table = table
+        self.scoreCount = document.contents[table.scoreId]?.entries.count ?? 0
+        self.score = document.contents[table.scoreId]?.entries.first?.score ?? 0
+    }
+}
 
-struct TableListView: View {
+private struct TableListView: View {
 
     let document: ScoreboardDocument
-    @Binding var tables: [Table]
+    @Binding var items: [TableItem]
 
-    @State private var sortOrder = [KeyPathComparator(\Table.name)]
+    @State private var sortOrder = [KeyPathComparator(\TableItem.table.name)]
 
     var body: some View {
-        SwiftUI.Table(tables, sortOrder: $sortOrder) {
-            TableColumn("Table", value: \.name) { table in
+        SwiftUI.Table(items, sortOrder: $sortOrder) {
+            TableColumn("Table", value: \.table.name) { item in
+                let table = item.table
                 NavigationLink(value: table) {
-                    Text(table.name)
+                    Text(table.name).italic(table.disabled)
                 }
             }
-            .width(min: 200)
+            .width(min: 230)
 
-            TableColumn("Status", value: \.comparableScoreStatus) { table in
-                Text(table.scoreStatus?.rawValue ?? "-")
+            TableColumn("Status", value: \.table.comparableScoreStatus) { item in
+                let table = item.table
+                if table.disabled {
+                    Text("disabled").italic()
+                } else {
+                    Text(table.scoreStatus?.rawValue ?? "-")
+                }
             }
-            TableColumn("Type", value: \.comparableScoreType) { table in
+            TableColumn("Type", value: \.table.comparableScoreType) { item in
+                let table = item.table
                 Text(table.scoreType?.rawValue ?? "-")
             }
-            TableColumn("Score") { table in
-                let score = document.contents[table.scoreId]?.entries.first?.score
-                Text(score?.formatted() ?? "-")
+            TableColumn("Score", value: \.score) { item in
+                if item.score == 0 {
+                    Text("-")
+                } else {
+                    Text(item.score.formatted())
+                }
             }
-            TableColumn("Count") { table in
-                let count = document.contents[table.scoreId]?.entries.count
-                Text(count?.formatted() ?? "-")
+            TableColumn("Count", value: \.scoreCount) { item in
+                if item.scoreCount == 0 {
+                    Text("-")
+                } else {
+                    Text(item.scoreCount.formatted())
+                }
             }
         }
         .onChange(of: sortOrder) {
-            tables.sort(using: sortOrder)
+            items.sort(using: sortOrder)
         }
     }
 }
@@ -53,11 +78,15 @@ struct TableSearchView: View {
     @Binding var path: NavigationPath
     @Binding var search: String
 
-    @State var items = [Table]()
+    @State private var items = [TableItem]()
+    
+    private func setTables(_ tables: any Sequence<Table>) {
+        self.items = tables.sorted().map { .init(table: $0, document: document) }
+    }
 
     var body: some View {
         VStack {
-            TableListView(document: document, tables: $items)
+            TableListView(document: document, items: $items)
         }
         .toolbar {
             Button(action: showInCabinet) {
@@ -72,7 +101,7 @@ struct TableSearchView: View {
             }
         )
         .onAppear {
-            self.items = document.contents.tables.values.sorted()
+            setTables(document.contents.tables.values)
             performSearch(search)
         }
     }
@@ -85,16 +114,15 @@ struct TableSearchView: View {
 
     private func performSearch(_ search: String) {
         if search.isEmpty {
-            self.items = document.contents.tables.values.sorted()
+            setTables(document.contents.tables.values)
         } else {
             let terms = search.lowercased()
-            self.items = document.contents.tables.values
+            setTables(document.contents.tables.values
                 .filter { table in
                     table.name.lowercased().contains(terms)
-                }
-                .sorted()
+                })
             if self.items.count == 1 {
-                path.append(self.items[0])
+                path.append(self.items[0].table)
             }
         }
     }

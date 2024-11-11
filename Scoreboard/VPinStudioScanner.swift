@@ -23,11 +23,13 @@ struct VPinStudioScanner: View {
         Button(action: scanScores) {
             Text("􀚁 Scores")
         }
+        #if os(macOS)
         .modifierKeyAlternate(.option) {
             Button(action: resetScanScores) {
                 Text("􀚁 Reset + Scores")
             }
         }
+        #endif
     }
 
     private func scanTables() {
@@ -57,9 +59,13 @@ struct VPinStudioScanner: View {
                 }
 
                 for tableId in tableIds {
-                    document[tableId]?.disabled = true
-                    if let table = document[tableId] {
-                        messages.append("Deleted (disabled) \(table.longDisplayName)")
+                    if document[tableId]?.disabled ?? true {
+                        // missing or already disabled
+                    } else {
+                        document[tableId]?.disabled = true
+                        if let table = document[tableId] {
+                            messages.append("Deleted (disabled) \(table.longDisplayName)")
+                        }
                     }
                 }
 

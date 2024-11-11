@@ -154,7 +154,7 @@ struct Score: Identifiable, Comparable, Hashable, Codable {
     var score: Int
     var date = Date()
 
-    var id: Date { date }
+    var id: String { "\(initials)\(score)" }
 
     static func < (lhs: Score, rhs: Score) -> Bool {
         lhs.score > rhs.score
@@ -173,10 +173,14 @@ struct Score: Identifiable, Comparable, Hashable, Codable {
 /// A scoreboard for a table
 struct TableScoreboard: Codable {
     var webId: WebTableId
+    
+    /// maybe useful if I update a table with an nvoffset and need to figure out what the old offset was
+    var name: String
     private(set) var entries = [Score]()
 
     init(_ table: Table) {
         self.webId = table.webId
+        self.name = table.name
     }
 
     @discardableResult
