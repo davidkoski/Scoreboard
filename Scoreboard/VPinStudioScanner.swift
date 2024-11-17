@@ -23,12 +23,15 @@ struct VPinStudioScanner: View {
         Button(action: scanScores) {
             Text("􀚁 Scores")
         }
-        #if os(macOS)
-        .modifierKeyAlternate(.option) {
-            Button(action: resetScanScores) {
-                Text("􀚁 Reset + Scores")
-            }
+        Button(action: scanVPinMania) {
+            Text("􀚁 Mania")
         }
+        #if os(macOS)
+            .modifierKeyAlternate(.option) {
+                Button(action: resetScanScores) {
+                    Text("􀚁 Reset + Scores")
+                }
+            }
         #endif
     }
 
@@ -164,4 +167,55 @@ struct VPinStudioScanner: View {
         }
     }
 
+    private func scanVPinMania() {
+        Task {
+            do {
+                busy = true
+                let client = VPinStudio()
+
+                try await withThrowingTaskGroup(of: (ScoreId, [VPinStudio.VPinManiaScore]).self) {
+                    group in
+                    for (scoreId, scoreboard) in document.contents.scores {
+                        group.addTask {
+                            (scoreId, try await client.getVPinManiaScores(id: scoreboard.webId))
+                        }
+                    }
+
+                    let count = document.contents.scores.count
+                    var nextUpdate = Date.timeIntervalSinceReferenceDate
+                    var i = 0
+
+                    for try await (scoreId, scores) in group {
+                        document.contents.scores[scoreId]?.mergeVPinManiaScores(scores)
+
+                        let now = Date.timeIntervalSinceReferenceDate
+                        if now >= nextUpdate {
+                            current = "\(i)/\(count)"
+                            nextUpdate = now + 0.25
+                        }
+
+                        i += 1
+                    }
+                }
+
+                let count = document.contents.scores.count
+                var nextUpdate = Date.timeIntervalSinceReferenceDate
+                for (i, (scoreId, scoreboard)) in document.contents.scores.enumerated() {
+                    let scores = try await client.getVPinManiaScores(id: scoreboard.webId)
+                    document.contents.scores[scoreId]?.mergeVPinManiaScores(scores)
+
+                    let now = Date.timeIntervalSinceReferenceDate
+                    if now >= nextUpdate {
+                        current = "\(i)/\(count)"
+                        nextUpdate = now + 0.25
+                    }
+                }
+
+            } catch {
+                print("Unable to scanScores: \(error)")
+                messages.append("failed: \(error)")
+            }
+            busy = false
+        }
+    }
 }

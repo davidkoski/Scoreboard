@@ -88,7 +88,7 @@ public struct ScoreId: Codable, Hashable, Sendable, Identifiable, Comparable,
     CustomStringConvertible
 {
     public let name: String
-    public let offset: Int
+    public var offset: Int
 
     public var id: ScoreId { self }
 
@@ -130,5 +130,11 @@ public struct ScoreId: Codable, Hashable, Sendable, Identifiable, Comparable,
         } else {
             "\(name):\(offset)"
         }
+    }
+
+    func withOffset(_ offset: Int) -> ScoreId {
+        var new = self
+        new.offset = offset
+        return new
     }
 }

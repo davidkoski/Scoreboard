@@ -48,12 +48,11 @@ struct RecentScoresView: View {
             let recent = Date() - 3 * 24 * 3600
 
             for (id, scores) in document.contents.scores {
-                let recentScores = scores.entries.filter { $0.date > recent }
-                if !recentScores.isEmpty, let table = document.contents.representative(id) {
-                    result.append(
-                        contentsOf:
-                            recentScores.map { ScoreTable(score: $0, table: table) }
-                    )
+                let bestScore = scores.best()
+                if let bestScore = scores.best(), bestScore.date > recent,
+                    let table = document.contents.representative(id)
+                {
+                    result.append(ScoreTable(score: bestScore, table: table))
                 }
             }
 

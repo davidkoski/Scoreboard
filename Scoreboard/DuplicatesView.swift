@@ -30,80 +30,45 @@ struct NVRam: Hashable, Identifiable, Comparable {
 struct DuplicatesView: View {
 
     @Binding var document: ScoreboardDocument
-
-    @State var counts: [ScoreId: Int] = [:]
-
-    @State var needsPrimary: Set<ScoreId> = []
-    @State var allMatch: Set<ScoreId> = []
-    @State var allEnabledMatch: Set<ScoreId> = []
-    @State var primary: [ScoreId: String] = [:]
+    @State var duplicates = [ScoreId: DuplicateTables]()
 
     var body: some View {
         VStack {
             List {
-                let counts = counts.sorted { $0.key < $1.key }
-                ForEach(counts, id: \.key) { key, count in
+                let duplicates = duplicates.sorted { $0.key < $1.key }
+                ForEach(duplicates, id: \.key) { key, tables in
+                    let disposition = tables.disposition
                     NavigationLink(value: key) {
-                        HStack {
-                            Text("\(key) (\(count))")
-                            
-                            if needsPrimary.contains(key) {
-                                Text(" must set primary")
-                            } else if allMatch.contains(key) {
-                                Text(" all match")
-                            } else if allEnabledMatch.contains(key) {
-                                Text(" all enabled match")
-                            }
-                            
-                            Spacer()
-                            
-                            if let primary = primary[key] {
-                                Text(primary)
-                            }
+                        Text("\(key) (\(tables.count))")
+
+                        switch disposition {
+                        case .allMatch: Text(" all match")
+                        case .allEnabledMatch: Text(" all enabled match")
+                        case .allDisabled: Text(" all tables disabled")
+                        case .needsPrimary: Text(" mismatch, primary set")
+                        case .mismatch: Text(" must set primary")
                         }
-                        .bold(needsPrimary.contains(key) || (!allMatch.contains(key) && !allEnabledMatch.contains(key)))
+
+                        Spacer()
+
+                        if let primary = tables.primaryTable {
+                            Text(primary.name)
+                        }
                     }
+                    .bold(disposition.needsWork)
                 }
             }
             .navigationDestination(for: ScoreId.self) { scoreId in
-                DuplicateScoreListView(document: $document, scoreId: scoreId)
+                DuplicateScoreListView(
+                    document: $document, scoreId: scoreId,
+                    duplicates: DuplicateTables(model: document.contents))
             }
         }
-        .task {
-            // count of distinct tables by scoreId (nvram + offset)
-            counts = Dictionary(
-                grouping: document.contents.tables.values
-                    .compactMap { $0.scoreId },
-                by: \.self
-            )
-            .mapValues(\.count)
-            .filter { $0.value > 1 }
 
-            // tables that can contribute scores
-            let primaryTables = document.contents.tables.values
-                .filter {
-                    !document.contents.hasMisconfiguredScores($0)
-                }
-                .sorted()
-            
-            // the primary table (exemplar in consistent order) of a table
-            // for a given scoreId
-            primary = Dictionary(primaryTables.map { ($0.scoreId, $0.name) }, uniquingKeysWith: { a, b in a })
-            
-            // the TableScoreboard doesn't have a webId set (doesn't have a game picked)
-            needsPrimary = Set(counts.keys.filter { document.contents.scores[$0] == nil })
-            
-            // there are multiple but all of the tables have the same id (good)
-            allMatch = Set(
-                counts.keys.filter {
-                    Set(document.contents.tablesByScoreId[$0]?.map { $0.webId } ?? []).count == 1
-                })
-            
-            // there are multiple but all of the *enabled* tables have the same id (good)
-            allEnabledMatch = Set(
-                counts.keys.filter {
-                    Set(document.contents.tablesByScoreId[$0]?.filter { !$0.disabled }.map { $0.webId } ?? []).count <= 1
-                })
+        // update when tables changes
+        .task(id: document.contents.tables) {
+            duplicates = DuplicateTables.buildDuplicates(from: document.contents)
+                .filter { $0.value.count > 1 }
         }
     }
 }
@@ -112,33 +77,45 @@ struct DuplicateScoreListView: View {
 
     @Binding var document: ScoreboardDocument
     let scoreId: ScoreId
+    @State var duplicates: DuplicateTables
 
     var body: some View {
-        let tables = (document.contents.tablesByScoreId[scoreId] ?? []).sorted()
+        let tables = duplicates.tables.sorted()
 
         return ScrollView(.vertical) {
             VStack {
-                let missingPrimary = document.contents.scores[scoreId]?.webId == nil
+                let primaryWebId = duplicates.primaryWebId
                 ForEach(tables) { table in
                     HStack {
                         let misconfigured = document.contents.hasMisconfiguredScores(table)
+                        let hasZeroOffset = scoreId.offset != 0 && table.scoreId.offset == 0
+                        let enabled =
+                            (misconfigured || (primaryWebId != table.webId)) && !hasZeroOffset
                         Button(action: {
                             document.contents.setScoresWebId(table)
                         }) {
                             Text("\(table.longName ?? table.name)")
                                 .bold(!misconfigured)
                         }
-                        .disabled(!missingPrimary && !misconfigured)
+                        .disabled(!enabled)
 
-                        if !misconfigured {
-                            Text("Active").bold()
+                        if primaryWebId == table.webId {
+                            Text("Primary").bold()
                         }
-                        
+
                         if table.disabled {
                             Text("Disabled")
                         }
+
+                        if hasZeroOffset {
+                            Text("Has zero NVOffset")
+                        }
                     }
                 }
+            }
+            .task(id: document.contents.scores) {
+                duplicates = DuplicateTables.buildDuplicates(
+                    from: document.contents, scoreId: scoreId)
             }
             .padding()
         }

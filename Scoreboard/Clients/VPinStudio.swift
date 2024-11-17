@@ -16,6 +16,18 @@ struct WrappedError: Error {
     let url: URL
 }
 
+private let localSession: URLSession = {
+    let configuration = URLSessionConfiguration.default
+    configuration.httpMaximumConnectionsPerHost = 10
+    return URLSession(configuration: configuration)
+}()
+
+private let maniaSession: URLSession = {
+    let configuration = URLSessionConfiguration.default
+    configuration.httpMaximumConnectionsPerHost = 3
+    return URLSession(configuration: configuration)
+}()
+
 /// Client for VPin Studio
 ///
 /// - https://github.com/syd711/vpin-studio
@@ -87,7 +99,7 @@ public struct VPinStudio {
         let url = scoresURL.appending(components: id.id)
         do {
             let request = URLRequest(url: url)
-            let (data, _) = try await URLSession.shared.data(for: request)
+            let (data, _) = try await localSession.data(for: request)
 
             return try JSONDecoder().decode(ScoresResponse.self, from: data)
                 .scores
@@ -165,7 +177,7 @@ public struct VPinStudio {
         let url = scanScoreURL.appending(components: id.id)
         do {
             let request = URLRequest(url: url)
-            let (data, _) = try await URLSession.shared.data(for: request)
+            let (data, _) = try await localSession.data(for: request)
 
             return try JSONDecoder().decode(ScanScoresResponse.self, from: data)
                 .disposition
@@ -249,7 +261,7 @@ public struct VPinStudio {
 
     public func getTablesList() async throws -> [TableDetails] {
         let request = URLRequest(url: listURL)
-        let (data, _) = try await URLSession.shared.data(for: request)
+        let (data, _) = try await localSession.data(for: request)
 
         return try JSONDecoder().decode([TableDetails].self, from: data)
     }
@@ -259,11 +271,15 @@ public struct VPinStudio {
         let initials: String
         let displayName: String
         let creationDate: Date
+
+        func asScore() -> Scoreboard.Score {
+            Scoreboard.Score(initials: initials, score: score, date: creationDate)
+        }
     }
 
     public func getVPinManiaScores(id: WebTableId) async throws -> [VPinManiaScore] {
         let request = URLRequest(url: vpinManiaScoresURL.appending(components: id.description))
-        let (data, _) = try await URLSession.shared.data(for: request)
+        let (data, _) = try await maniaSession.data(for: request)
 
         // 2024-07-30 03:58:39
         let f = DateFormatter()

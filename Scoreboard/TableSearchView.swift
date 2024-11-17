@@ -11,13 +11,16 @@ private struct TableItem: Identifiable {
     let table: Table
     let scoreCount: Int
     let score: Int
-    
+    let rank: Int
+
     var id: CabinetTableId { table.id }
-    
+
     init(table: Table, document: ScoreboardDocument) {
         self.table = table
-        self.scoreCount = document.contents[table.scoreId]?.entries.count ?? 0
-        self.score = document.contents[table.scoreId]?.entries.first?.score ?? 0
+        let scoreboard = document.contents[table.scoreId]
+        self.scoreCount = scoreboard?.localCount ?? 0
+        self.score = scoreboard?.best()?.score ?? 0
+        self.rank = scoreboard?.rank() ?? 0
     }
 }
 
@@ -57,6 +60,13 @@ private struct TableListView: View {
                     Text(item.score.formatted())
                 }
             }
+            TableColumn("Rank", value: \.rank) { item in
+                if item.rank == 0 {
+                    Text("-")
+                } else {
+                    Text(item.rank.formatted())
+                }
+            }
             TableColumn("Count", value: \.scoreCount) { item in
                 if item.scoreCount == 0 {
                     Text("-")
@@ -79,7 +89,7 @@ struct TableSearchView: View {
     @Binding var search: String
 
     @State private var items = [TableItem]()
-    
+
     private func setTables(_ tables: any Sequence<Table>) {
         self.items = tables.sorted().map { .init(table: $0, document: document) }
     }
@@ -117,10 +127,11 @@ struct TableSearchView: View {
             setTables(document.contents.tables.values)
         } else {
             let terms = search.lowercased()
-            setTables(document.contents.tables.values
-                .filter { table in
-                    table.name.lowercased().contains(terms)
-                })
+            setTables(
+                document.contents.tables.values
+                    .filter { table in
+                        table.name.lowercased().contains(terms)
+                    })
             if self.items.count == 1 {
                 path.append(self.items[0].table)
             }

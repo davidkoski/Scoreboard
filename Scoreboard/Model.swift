@@ -156,6 +156,8 @@ struct Score: Identifiable, Comparable, Hashable, Codable {
 
     var id: String { "\(initials)\(score)" }
 
+    var isLocal: Bool { initials == OWNER_INITIALS }
+
     static func < (lhs: Score, rhs: Score) -> Bool {
         lhs.score > rhs.score
     }
@@ -171,9 +173,9 @@ struct Score: Identifiable, Comparable, Hashable, Codable {
 }
 
 /// A scoreboard for a table
-struct TableScoreboard: Codable {
+struct TableScoreboard: Codable, Equatable {
     var webId: WebTableId
-    
+
     /// maybe useful if I update a table with an nvoffset and need to figure out what the old offset was
     var name: String
     private(set) var entries = [Score]()
@@ -181,6 +183,20 @@ struct TableScoreboard: Codable {
     init(_ table: Table) {
         self.webId = table.webId
         self.name = table.name
+    }
+
+    public var localCount: Int { entries.lazy.filter { $0.isLocal }.count }
+
+    public func rank(initials: String = OWNER_INITIALS) -> Int? {
+        if let index = entries.firstIndex(where: { $0.initials == initials }) {
+            index + 1
+        } else {
+            nil
+        }
+    }
+
+    public func best(initials: String = OWNER_INITIALS) -> Score? {
+        entries.first { $0.initials == initials }
     }
 
     @discardableResult
@@ -194,6 +210,11 @@ struct TableScoreboard: Codable {
 
     public mutating func remove(_ score: Score) {
         entries.removeAll { $0 == score }
+    }
+
+    public mutating func mergeVPinManiaScores(_ scores: [VPinStudio.VPinManiaScore]) {
+        entries = entries.filter { $0.isLocal } + scores.map { $0.asScore() }.filter { !$0.isLocal }
+        entries.sort()
     }
 }
 

@@ -17,6 +17,7 @@ struct TableDetailView: View {
 
     @Binding var table: Table
     @Binding var scores: TableScoreboard
+    @State var sortedScores = [Score]()
 
     @State var showScore = false
     @State var showCamera = false
@@ -28,6 +29,8 @@ struct TableDetailView: View {
     @State var vpinManiaScores: [Score]?
 
     @State private var confirmationShown = false
+
+    @State private var sortOrder = [KeyPathComparator(\Score.score, order: .reverse)]
 
     @FocusState var searchFocused: Bool
     @FocusState var viewFocused: Bool
@@ -121,33 +124,50 @@ struct TableDetailView: View {
                 #endif
 
                 if !hideWhileEditing {
-                    List {
-                        ForEach(combinedScores()) { score in
-                            HStack {
-                                Text(score.initials)
-                                    .frame(width: 50)
-                                Text(score.score.formatted())
-                                    .frame(width: 200, alignment: .trailing)
-                                Text(score.date.formatted())
-                                    .frame(width: 200)
-                            }
-                            .bold(score.initials == OWNER_INITIALS)
-                            .contextMenu {
-                                Button(action: { delete(score: score) }) {
-                                    Text("Delete")
-                                }
+                    SwiftUI.Table(sortOrder: $sortOrder) {
+                        TableColumn("Initials", value: \.initials) { score in
+                            Text(score.initials)
+                                .bold(score.isLocal)
+                        }
+                        .width(75)
+                        TableColumn("Score", value: \.score) { score in
+                            Text(score.score.formatted())
+                                .frame(alignment: .trailing)
+                                .bold(score.isLocal)
+                        }
+                        .width(200)
+                        TableColumn("Date", value: \.date) { score in
+                            Text(score.date.formatted())
+                                .bold(score.isLocal)
+                        }
+                        .width(200)
+                    } rows: {
+                        ForEach(sortedScores) { score in
+                            if score.isLocal {
+                                TableRow(score)
+                                    .contextMenu {
+                                        Button(action: { delete(score: score) }) {
+                                            Text("Delete")
+                                        }
+                                    }
+                            } else {
+                                TableRow(score)
                             }
                         }
-                        .onDelete { indexes in
-                            if let index = indexes.first {
-                                delete(score: scores.entries[index])
-                            }
-                        }
+                    }
+                    .onChange(of: sortOrder) {
+                        sortedScores = scores.entries.sorted(using: sortOrder)
+                    }
+                    .onChange(of: scores) {
+                        // if the scoreboard changes
+                        sortedScores = scores.entries.sorted(using: sortOrder)
                     }
                     .focused($viewFocused)
                     .task {
                         // put focus on the view so cmd-f will work (as expected)
                         viewFocused = true
+
+                        sortedScores = scores.entries.sorted(using: sortOrder)
                     }
                 }
             }
@@ -221,18 +241,7 @@ struct TableDetailView: View {
         Task {
             do {
                 let scores = try await VPinStudio().getVPinManiaScores(id: table.webId)
-
-                withAnimation {
-                    self.vpinManiaScores =
-                        scores
-                        .filter {
-                            // filter out my local scores
-                            $0.initials != OWNER_INITIALS
-                        }
-                        .map {
-                            Score(initials: $0.initials, score: $0.score, date: $0.creationDate)
-                        }
-                }
+                self.scores.mergeVPinManiaScores(scores)
             } catch {
                 print("Error fetching vpin mania scores: \(error)")
             }
