@@ -18,45 +18,26 @@ struct RecentScoresView: View {
 
     let document: ScoreboardDocument
 
-    @State private var scores = [ScoreTable]()
-    @State private var sortOrder = [KeyPathComparator(\ScoreTable.score.date, order: .reverse)]
+    @State private var items = [TableItem]()
 
     var body: some View {
-        SwiftUI.Table(scores, sortOrder: $sortOrder) {
-            TableColumn("Table", value: \.table.name) { st in
-                NavigationLink(value: st.table) {
-                    Text(st.table.name)
-                }
-            }
-            .width(min: 200)
-
-            TableColumn("Initials", value: \.score.initials)
-                .width(min: 50, max: 50)
-
-            TableColumn("Score", value: \.score) { st in
-                Text(st.score.score.formatted())
-            }
-            TableColumn("Date", value: \.score.date) { st in
-                Text(st.score.date.formatted())
-            }
-        }
-        .onChange(of: sortOrder) {
-            scores.sort(using: sortOrder)
+        VStack {
+            TableListView(document: document, items: $items, showLastScoreDate: true)
         }
         .task {
-            var result = [ScoreTable]()
+            var tables = [Table]()
             let recent = Date() - 3 * 24 * 3600
 
             for (id, scores) in document.contents.scores {
-                let bestScore = scores.best()
                 if let bestScore = scores.best(), bestScore.date > recent,
                     let table = document.contents.representative(id)
                 {
-                    result.append(ScoreTable(score: bestScore, table: table))
+                    tables.append(table)
                 }
             }
 
-            self.scores = result.sorted(using: sortOrder)
+            self.items = tables.sorted().map { .init(table: $0, document: document) }
         }
     }
+
 }

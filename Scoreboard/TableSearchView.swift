@@ -7,11 +7,13 @@
 
 import SwiftUI
 
-private struct TableItem: Identifiable {
+struct TableItem: Identifiable {
     let table: Table
     let scoreCount: Int
     let score: Int
     let rank: Int
+    let lastScoreDate: Date?
+    var lastScoreDateComparable: TimeInterval { lastScoreDate?.timeIntervalSinceReferenceDate ?? 0 }
 
     var id: CabinetTableId { table.id }
 
@@ -21,18 +23,30 @@ private struct TableItem: Identifiable {
         self.scoreCount = scoreboard?.localCount ?? 0
         self.score = scoreboard?.best()?.score ?? 0
         self.rank = scoreboard?.rank() ?? 0
+        self.lastScoreDate = scoreboard?.best()?.date
     }
 }
 
-private struct TableListView: View {
+struct TableListView: View {
 
     let document: ScoreboardDocument
     @Binding var items: [TableItem]
+    var showLastScoreDate = false
+
+    @State var playable = true
 
     @State private var sortOrder = [KeyPathComparator(\TableItem.table.name)]
 
+    func filteredItems() -> [TableItem] {
+        if playable {
+            items.filter { !$0.table.disabled }
+        } else {
+            items
+        }
+    }
+
     var body: some View {
-        SwiftUI.Table(items, sortOrder: $sortOrder) {
+        SwiftUI.Table(filteredItems(), sortOrder: $sortOrder) {
             TableColumn("Table", value: \.table.name) { item in
                 let table = item.table
                 NavigationLink(value: table) {
@@ -67,6 +81,8 @@ private struct TableListView: View {
                     Text(item.rank.formatted())
                 }
             }
+            .width(60)
+
             TableColumn("Count", value: \.scoreCount) { item in
                 if item.scoreCount == 0 {
                     Text("-")
@@ -74,9 +90,30 @@ private struct TableListView: View {
                     Text(item.scoreCount.formatted())
                 }
             }
+            .width(60)
+
+            if showLastScoreDate {
+                TableColumn("Last Score", value: \.lastScoreDateComparable) { item in
+                    if let lastScoreDate = item.lastScoreDate {
+                        Text(lastScoreDate.formatted(date: .numeric, time: .omitted))
+                    } else {
+                        Text("-")
+                    }
+                }
+            }
         }
         .onChange(of: sortOrder) {
             items.sort(using: sortOrder)
+        }
+        .toolbar {
+            Toggle(isOn: $playable) {
+                Text("Playable")
+            }
+        }
+        .task {
+            if showLastScoreDate {
+                sortOrder = [KeyPathComparator(\TableItem.lastScoreDateComparable, order: .reverse)]
+            }
         }
     }
 }
