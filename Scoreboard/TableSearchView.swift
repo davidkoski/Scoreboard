@@ -12,6 +12,7 @@ struct TableItem: Identifiable {
     let scoreCount: Int
     let score: Int
     let rank: Int
+    let rankCount: Int
     let lastScoreDate: Date?
     var lastScoreDateComparable: TimeInterval { lastScoreDate?.timeIntervalSinceReferenceDate ?? 0 }
 
@@ -23,6 +24,7 @@ struct TableItem: Identifiable {
         self.scoreCount = scoreboard?.localCount ?? 0
         self.score = scoreboard?.best()?.score ?? 0
         self.rank = scoreboard?.rank() ?? 0
+        self.rankCount = scoreboard?.rankCount() ?? 0
         self.lastScoreDate = scoreboard?.best()?.date
     }
 }
@@ -34,15 +36,18 @@ struct TableListView: View {
     var showLastScoreDate = false
 
     @State var playable = true
+    @State var vr: Table.VR = .partial
 
     @State private var sortOrder = [KeyPathComparator(\TableItem.table.name)]
 
     func filteredItems() -> [TableItem] {
-        if playable {
-            items.filter { !$0.table.disabled }
-        } else {
-            items
-        }
+        items
+            .filter {
+                !playable || !$0.table.disabled
+            }
+            .filter {
+                $0.table.vr.matches(vr)
+            }
     }
 
     var body: some View {
@@ -50,6 +55,8 @@ struct TableListView: View {
             TableColumn("Table", value: \.table.name) { item in
                 let table = item.table
                 NavigationLink(value: table) {
+                    Image(systemName: table.vr.imageName)
+                    Spacer().frame(width: 4)
                     Text(table.name).italic(table.disabled)
                 }
             }
@@ -76,9 +83,13 @@ struct TableListView: View {
             }
             TableColumn("Rank", value: \.rank) { item in
                 if item.rank == 0 {
-                    Text("-")
+                    if item.rankCount > 0 {
+                        Text("- / \(item.rankCount.formatted())")
+                    } else {
+                        Text("-")
+                    }
                 } else {
-                    Text(item.rank.formatted())
+                    Text("\(item.rank.formatted()) / \(item.rankCount.formatted())")
                 }
             }
             .width(60)
@@ -107,7 +118,10 @@ struct TableListView: View {
         }
         .toolbar {
             Toggle(isOn: $playable) {
-                Text("Playable")
+                Image(systemName: "hand.thumbsup")
+            }
+            Button(action: nextVR) {
+                Image(systemName: vr.imageName)
             }
         }
         .task {
@@ -115,6 +129,15 @@ struct TableListView: View {
                 sortOrder = [KeyPathComparator(\TableItem.lastScoreDateComparable, order: .reverse)]
             }
         }
+    }
+
+    func nextVR() {
+        self.vr =
+            switch vr {
+            case .partial: .full
+            case .full: .flat
+            case .flat: .partial
+            }
     }
 }
 

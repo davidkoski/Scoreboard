@@ -13,7 +13,7 @@ struct TableDetailView: View {
     let document: ScoreboardDocument
 
     @Binding var path: NavigationPath
-    @Binding var search: String
+    @State var search: String = ""
 
     @Binding var table: Table
     @Binding var scores: TableScoreboard
@@ -68,6 +68,10 @@ struct TableDetailView: View {
                 VStack {
                     HStack {
                         Spacer()
+
+                        Image(systemName: table.vr.imageName)
+                        Spacer().frame(width: 8)
+
                         Text(table.longDisplayName)
                             .font(.headline)
 
@@ -315,10 +319,10 @@ struct TableDetailView: View {
             let allScores = try await VPinStudio().getScores(id: id)
 
             if let best = bestScore(allScores) {
-                if !scores.entries.contains(where: { $0.score == best.numericScore }) {
+                if !scores.entries.contains(where: { $0.score == best.score }) {
                     await MainActor.run {
                         withAnimation {
-                            saveScore(.init(initials: OWNER_INITIALS, score: best.numericScore))
+                            saveScore(.init(initials: OWNER_INITIALS, score: best.score))
                         }
                     }
                 }

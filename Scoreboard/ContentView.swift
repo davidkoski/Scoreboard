@@ -56,7 +56,7 @@ struct ContentView: View {
             }
             .navigationDestination(for: Table.self) { table in
                 TableDetailView(
-                    document: document, path: $path, search: $search,
+                    document: document, path: $path,
                     table: tableBinding(table), scores: scoreBinding(table))
             }
         }

@@ -23,16 +23,13 @@ struct VPinStudioScanner: View {
         Button(action: scanScores) {
             Text("􀚁 Scores")
         }
+        Button(action: resetScanScores) {
+            Text("􀁠")
+        }
+        .help("Reset table status + rescan")
         Button(action: scanVPinMania) {
             Text("􀚁 Mania")
         }
-        #if os(macOS)
-            .modifierKeyAlternate(.option) {
-                Button(action: resetScanScores) {
-                    Text("􀚁 Reset + Scores")
-                }
-            }
-        #endif
     }
 
     private func scanTables() {
@@ -115,7 +112,7 @@ struct VPinStudioScanner: View {
                                 return (
                                     table,
                                     .init(
-                                        initials: OWNER_INITIALS, score: best.numericScore),
+                                        initials: OWNER_INITIALS, score: best.score),
                                     .ok
                                 )
                             } else if table.scoreStatus == nil {
@@ -173,6 +170,7 @@ struct VPinStudioScanner: View {
                 busy = true
                 let client = VPinStudio()
 
+                // gather scores from vpinmania
                 try await withThrowingTaskGroup(of: (ScoreId, [VPinStudio.VPinManiaScore]).self) {
                     group in
                     for (scoreId, scoreboard) in document.contents.scores {

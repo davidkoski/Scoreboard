@@ -102,7 +102,7 @@ public struct ScoreId: Codable, Hashable, Sendable, Identifiable, Comparable,
         case .nvram:
             self.name = table.rom
             self.offset = table.nvOffset
-        case .em:
+        case .em, .ini:
             self.name = table.hsFileName ?? table.rom
             self.offset = 0
         case .vpreg:

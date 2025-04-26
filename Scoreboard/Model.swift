@@ -195,6 +195,13 @@ struct TableScoreboard: Codable, Equatable {
         }
     }
 
+    public func rankCount(initials: String = OWNER_INITIALS) -> Int {
+        entries
+            .lazy
+            .filter { $0.initials != initials }
+            .count + 1
+    }
+
     public func best(initials: String = OWNER_INITIALS) -> Score? {
         entries.first { $0.initials == initials }
     }
@@ -213,8 +220,21 @@ struct TableScoreboard: Codable, Equatable {
     }
 
     public mutating func mergeVPinManiaScores(_ scores: [VPinStudio.VPinManiaScore]) {
-        entries = entries.filter { $0.isLocal } + scores.map { $0.asScore() }.filter { !$0.isLocal }
+        // note: the vpin mania scores often contain dups, thus the Set
+        entries =
+            entries.filter { $0.isLocal } + Set(scores).map { $0.asScore() }.filter { !$0.isLocal }
         entries.sort()
+    }
+}
+
+private func vrType(_ table: VPinStudio.TableDetails) -> Table.VR {
+    let name = table.gameDisplayName ?? ""
+    if name.hasSuffix("VR") {
+        return .full
+    } else if name.hasSuffix("VROK") {
+        return .partial
+    } else {
+        return .flat
     }
 }
 
@@ -246,6 +266,32 @@ struct Table: Identifiable, Comparable, Hashable, Codable {
     /// table is disabled in the cabinet
     var disabled: Bool
 
+    enum VR: Codable, CaseIterable {
+        case full
+        case partial
+        case flat
+
+        func matches(_ other: VR) -> Bool {
+            switch (self, other) {
+            case (.full, .full): return true
+            case (.full, .partial): return true
+            case (.partial, .partial): return true
+            case (_, .flat): return true
+            default: return false
+            }
+        }
+
+        var imageName: String {
+            switch self {
+            case .flat: "rectangle"
+            case .partial: "cube.transparent"
+            case .full: "cube"
+            }
+        }
+    }
+
+    var vr: VR
+
     var sortKey: String {
         name
             .lowercased()
@@ -261,6 +307,7 @@ struct Table: Identifiable, Comparable, Hashable, Codable {
         self.scoreType = table.highscoreType
         self.scoreId = table.scoreId
         self.disabled = table.disabled
+        self.vr = vrType(table)
     }
 
     public mutating func update(_ other: VPinStudio.TableDetails) -> Bool {
@@ -283,6 +330,12 @@ struct Table: Identifiable, Comparable, Hashable, Codable {
 
         update(\.scoreType, \.highscoreType)
         update(\.scoreId, \.scoreId)
+
+        let vr = vrType(other)
+        if self.vr != vr {
+            changed = true
+            self.vr = vr
+        }
 
         return changed
     }

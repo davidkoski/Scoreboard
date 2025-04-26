@@ -8,7 +8,7 @@
 import Foundation
 
 func bestScore(_ scores: [VPinStudio.Score]) -> VPinStudio.Score? {
-    Set(scores.filter { $0.playerInitials == OWNER_INITIALS && $0.numericScore > 0 }).sorted().last
+    Set(scores.filter { $0.playerInitials == OWNER_INITIALS && $0.score > 0 }).sorted().last
 }
 
 struct WrappedError: Error {
@@ -61,33 +61,10 @@ public struct VPinStudio {
         let playerInitials: String
 
         // "score": "48,104,320"
-        let score: String
-        let numericScore: Int
+        let score: Int
 
         public static func < (lhs: VPinStudio.Score, rhs: VPinStudio.Score) -> Bool {
-            lhs.numericScore < rhs.numericScore
-        }
-
-        private enum CodingKeys: CodingKey {
-            case playerInitials
-            case score
-        }
-
-        public init(from decoder: any Decoder) throws {
-            let container: KeyedDecodingContainer<VPinStudio.Score.CodingKeys> =
-                try decoder.container(keyedBy: VPinStudio.Score.CodingKeys.self)
-
-            self.playerInitials = try container.decode(
-                String.self, forKey: VPinStudio.Score.CodingKeys.playerInitials)
-            self.score = try container.decode(
-                String.self, forKey: VPinStudio.Score.CodingKeys.score)
-
-            let strippedScore =
-                score
-                .replacingOccurrences(of: " ", with: "")
-                .replacingOccurrences(of: ",", with: "")
-                .replacingOccurrences(of: ".", with: "")
-            self.numericScore = Int(strippedScore) ?? 0
+            lhs.score < rhs.score
         }
     }
 
@@ -190,6 +167,7 @@ public struct VPinStudio {
         case nvram = "NVRam"
         case em = "EM"
         case vpreg = "VPReg"
+        case ini = "Ini"
         case na = "N/A"
 
         private var sortOrder: Int {
@@ -197,7 +175,8 @@ public struct VPinStudio {
             case .nvram: return 0
             case .em: return 1
             case .vpreg: return 2
-            case .na: return 3
+            case .ini: return 3
+            case .na: return 4
             }
         }
 
@@ -266,7 +245,11 @@ public struct VPinStudio {
         return try JSONDecoder().decode([TableDetails].self, from: data)
     }
 
-    public struct VPinManiaScore: Decodable {
+    public struct VPinManiaScores: Decodable {
+        let data: [VPinManiaScore]
+    }
+
+    public struct VPinManiaScore: Decodable, Hashable {
         let score: Int
         let initials: String
         let displayName: String
@@ -274,6 +257,15 @@ public struct VPinStudio {
 
         func asScore() -> Scoreboard.Score {
             Scoreboard.Score(initials: initials, score: score, date: creationDate)
+        }
+
+        public func hash(into hasher: inout Hasher) {
+            hasher.combine(score)
+            hasher.combine(initials)
+        }
+
+        public static func == (lhs: VPinManiaScore, rhs: VPinManiaScore) -> Bool {
+            lhs.score == rhs.score && lhs.initials == rhs.initials
         }
     }
 
@@ -288,6 +280,6 @@ public struct VPinStudio {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .formatted(f)
 
-        return try decoder.decode([VPinManiaScore].self, from: data)
+        return try decoder.decode(VPinManiaScores.self, from: data).data
     }
 }
