@@ -20,6 +20,7 @@
 		C3A4102E2C6EE33B00E47F63 /* VPinStudioScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3A4102D2C6EE33B00E47F63 /* VPinStudioScanner.swift */; };
 		C3A410302C6EE83C00E47F63 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3A4102F2C6EE83C00E47F63 /* Configuration.swift */; };
 		C3A410322C6EE89A00E47F63 /* DuplicatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3A410312C6EE89A00E47F63 /* DuplicatesView.swift */; };
+		C3CB07042CE9AC3600AD650F /* Duplicates.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3CB07032CE9AC3600AD650F /* Duplicates.swift */; };
 		C3D0AABD2C05593F00B8BD73 /* ScoreboardApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D0AABC2C05593F00B8BD73 /* ScoreboardApp.swift */; };
 		C3D0AABF2C05593F00B8BD73 /* TableSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D0AABE2C05593F00B8BD73 /* TableSearchView.swift */; };
 		C3D0AAC32C05594000B8BD73 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C3D0AAC22C05594000B8BD73 /* Assets.xcassets */; };
@@ -56,6 +57,7 @@
 		C3A4102D2C6EE33B00E47F63 /* VPinStudioScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VPinStudioScanner.swift; sourceTree = "<group>"; };
 		C3A4102F2C6EE83C00E47F63 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		C3A410312C6EE89A00E47F63 /* DuplicatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicatesView.swift; sourceTree = "<group>"; };
+		C3CB07032CE9AC3600AD650F /* Duplicates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Duplicates.swift; sourceTree = "<group>"; };
 		C3D0AAB92C05593F00B8BD73 /* Scoreboard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Scoreboard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3D0AABC2C05593F00B8BD73 /* ScoreboardApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreboardApp.swift; sourceTree = "<group>"; };
 		C3D0AABE2C05593F00B8BD73 /* TableSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableSearchView.swift; sourceTree = "<group>"; };
@@ -165,6 +167,7 @@
 				C36981422C1E4C2900B4A704 /* ScoreEntry.swift */,
 				C3D0AABE2C05593F00B8BD73 /* TableSearchView.swift */,
 				C3D0AAD92C05758700B8BD73 /* Model.swift */,
+				C3CB07032CE9AC3600AD650F /* Duplicates.swift */,
 				C3D0AAC22C05594000B8BD73 /* Assets.xcassets */,
 				C3D0AAD72C05753F00B8BD73 /* Camera */,
 				C3D0AAC52C05594000B8BD73 /* Preview Content */,
@@ -324,6 +327,7 @@
 				C369813C2C15497000B4A704 /* VPinStudio.swift in Sources */,
 				C3A410322C6EE89A00E47F63 /* DuplicatesView.swift in Sources */,
 				C3D0AAE22C057C4300B8BD73 /* PinupPopper.swift in Sources */,
+				C3CB07042CE9AC3600AD650F /* Duplicates.swift in Sources */,
 				C3A410302C6EE83C00E47F63 /* Configuration.swift in Sources */,
 				C3D0AAD62C056C6300B8BD73 /* CountedSet.swift in Sources */,
 				C3D0AABD2C05593F00B8BD73 /* ScoreboardApp.swift in Sources */,
@@ -530,7 +534,7 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
@@ -570,7 +574,7 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.0;

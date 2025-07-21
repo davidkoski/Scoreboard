@@ -87,10 +87,19 @@ struct VPinStudioScanner: View {
     }
 
     private func scanScores() {
+        let client = VPinStudio()
+        Task {
+            do {
+                let activities = try await client.getActivityDetails()
+                document.contents.activity.record(activities, tables: document.contents.tables)
+            } catch {
+                print("Unable to getActivityDetails: \(error)")
+                messages.append("failed: \(error)")
+            }
+        }
         Task {
             do {
                 busy = true
-                let client = VPinStudio()
                 try await withThrowingTaskGroup(of: (Table, Score?, VPinStudio.ScoreStatus?)?.self)
                 { group in
                     current = "Sending requests..."

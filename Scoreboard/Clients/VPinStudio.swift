@@ -51,6 +51,8 @@ public struct VPinStudio {
 
     let detailsURL = URL(string: "\(CABINET_URL):\(VPIN_STUDIO_PORT)/api/v1/popper/tabledetails")!
 
+    let activityURL = URL(string: "\(CABINET_URL):\(VPIN_STUDIO_PORT)/api/v1/alx")!
+
     let vpinManiaScoresURL = URL(string: "https://www.vpin-mania.net/api/highscores/table")!
 
     public func wheelImageURL(id: CabinetTableId) -> URL {
@@ -282,4 +284,39 @@ public struct VPinStudio {
 
         return try decoder.decode(VPinManiaScores.self, from: data).data
     }
+
+    public struct Activity: Decodable {
+        /*
+         {
+           "uniqueId": 1068,
+           "gameId": 1326,
+           "lastPlayed": 1752896307367,
+           "numberOfPlays": 2,
+           "timePlayedSecs": 2266,
+           "displayName": "City Hunter (Original 2025) Tombg 1.0.0 VR",
+           "scores": 2,
+           "highscores": 2
+         },
+         */
+
+        let gameId: CabinetTableId
+        let lastPlayed: Date
+        let numberOfPlays: Int
+        let timePlayedSecs: Int
+    }
+
+    public func getActivityDetails() async throws -> [Activity] {
+        let request = URLRequest(url: activityURL)
+        let (data, _) = try await localSession.data(for: request)
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .millisecondsSince1970
+
+        struct Container: Decodable {
+            let entries: [Activity]
+        }
+
+        return try decoder.decode(Container.self, from: data).entries
+    }
+
 }
