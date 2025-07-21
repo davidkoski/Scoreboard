@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 
+/// Gathers data from VPin Studio and updates the ````
 struct VPinStudioScanner: View {
 
     @Binding var document: ScoreboardDocument
