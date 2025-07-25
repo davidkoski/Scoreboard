@@ -13,7 +13,8 @@ struct TableDetailView: View {
     let document: ScoreboardDocument
 
     @Binding var path: NavigationPath
-    @State var search: String = ""
+    @Binding var search: String
+    @State var localSearch = ""
 
     @Binding var table: Table
     @Binding var scores: TableScoreboard
@@ -186,19 +187,15 @@ struct TableDetailView: View {
             }
         }
 
-        .searchable(text: $search)
+        .searchable(text: $localSearch)
         .searchFocused($searchFocused)
         .onSubmit(
             of: .search,
             {
                 path.removeLast(path.count)
-                path.append("Tables")
+                search = localSearch
             }
         )
-        .onAppear {
-            // reset the search
-            search = ""
-        }
         .onKeyPress { keypress in
             if keypress.key == "f" && keypress.modifiers.contains(.command) {
                 searchFocused = true

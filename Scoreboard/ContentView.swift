@@ -12,12 +12,38 @@ struct ContentView: View {
 
     @Binding var document: ScoreboardDocument
 
-    @State var path = NavigationPath()
     @State var search = ""
 
     @State var busy = false
     @State var current: String?
     @State var messages = [String]()
+
+    enum Tab: String, Hashable, CaseIterable, Identifiable {
+        case recent
+        case tables
+        case dups
+
+        var id: String { rawValue }
+
+        var systemImage: String {
+            switch self {
+            case .recent: "clock"
+            case .tables: "table.furniture"
+            case .dups: "square.stack"
+            }
+        }
+    }
+    @State var tab = Tab.recent
+    @State var tabState = [Tab: NavigationPath]()
+
+    var path: Binding<NavigationPath> {
+        Binding {
+            tabState[tab] ?? .init()
+        } set: {
+            tabState[tab] = $0
+        }
+
+    }
 
     func tableBinding(_ table: Table) -> Binding<Table> {
         Binding {
@@ -36,39 +62,36 @@ struct ContentView: View {
     }
 
     var body: some View {
-        NavigationStack(path: $path) {
-            List {
-                NavigationLink("Recent", value: "Recent")
-                NavigationLink("Tables", value: "Tables")
-                NavigationLink("Duplicates", value: "Duplicates")
-            }
-            .navigationDestination(for: String.self) { key in
-                switch key {
-                case "Recent":
+        NavigationStack(path: path) {
+            Group {
+                switch tab {
+                case .recent:
                     RecentScoresView(document: document)
-                case "Tables":
-                    TableSearchView(document: document, path: $path, search: $search)
-                case "Duplicates":
+                case .tables:
+                    TableSearchView(document: document, path: path, search: $search)
+                case .dups:
                     DuplicatesView(document: $document)
-                default:
-                    EmptyView()
                 }
             }
             .navigationDestination(for: Table.self) { table in
                 TableDetailView(
-                    document: document, path: $path,
+                    document: document, path: path, search: $search,
                     table: tableBinding(table), scores: scoreBinding(table))
             }
         }
         .toolbar {
+            ForEach(Tab.allCases) { tab in
+                Button(action: { self.tab = tab }) {
+                    Image(systemName: tab.systemImage)
+                }
+                .buttonStyle(.plain)
+                .bold(self.tab == tab)
+            }
             VPinStudioScanner(
                 document: $document, busy: $busy, current: $current, messages: $messages)
             Button(action: selectCurrent) {
                 Text("Current")
             }
-        }
-        .onAppear {
-            path.append("Recent")
         }
         .overlay {
             if busy || !messages.isEmpty {
@@ -112,10 +135,10 @@ struct ContentView: View {
                 }
 
                 if let table = document[id] {
-                    if !path.isEmpty {
-                        path.removeLast()
+                    if !path.wrappedValue.isEmpty {
+                        path.wrappedValue.removeLast()
                     }
-                    path.append(table)
+                    path.wrappedValue.append(table)
                 }
             } catch {
                 print("Unable to get current: \(error)")

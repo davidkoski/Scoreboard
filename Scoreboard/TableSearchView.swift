@@ -150,6 +150,9 @@ struct TableSearchView: View {
 
     @State private var items = [TableItem]()
 
+    @FocusState var searchFocused: Bool
+    @FocusState var viewFocused: Bool
+
     private func setTables(_ tables: any Sequence<Table>) {
         self.items = tables.sorted().map { .init(table: $0, document: document) }
     }
@@ -164,6 +167,7 @@ struct TableSearchView: View {
             }
         }
         .searchable(text: $search)
+        .searchFocused($searchFocused)
         .onChange(
             of: search,
             { oldValue, newValue in
@@ -173,6 +177,18 @@ struct TableSearchView: View {
         .onAppear {
             setTables(document.contents.tables.values)
             performSearch(search)
+        }
+        .onKeyPress { keypress in
+            if keypress.key == "f" && keypress.modifiers.contains(.command) {
+                searchFocused = true
+                return .handled
+            }
+            return .ignored
+        }
+        .focused($viewFocused)
+        .task {
+            // put focus on the view so cmd-f will work (as expected)
+            viewFocused = true
         }
     }
 
