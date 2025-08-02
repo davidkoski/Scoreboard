@@ -165,6 +165,7 @@ struct VPinStudioScanner: View {
                             }
                         }
                     }
+                    document.incrementSerialNumber()
                 }
             } catch {
                 print("Unable to scanScores: \(error)")
@@ -218,6 +219,8 @@ struct VPinStudioScanner: View {
                         nextUpdate = now + 0.25
                     }
                 }
+                
+                document.incrementSerialNumber()
 
             } catch {
                 print("Unable to scanScores: \(error)")

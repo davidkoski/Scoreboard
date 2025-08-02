@@ -24,7 +24,7 @@ struct RecentScoresView: View {
         VStack {
             TableListView(document: document, items: $items, showLastScoreDate: true)
         }
-        .task {
+        .task(id: document.serialNumber) {
             var tables = [Table]()
             let recent = Date() - 3 * 24 * 3600
 

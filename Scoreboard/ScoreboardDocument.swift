@@ -18,6 +18,7 @@ struct ScoreboardDocument: FileDocument {
     static let readableContentTypes = [UTType(importedAs: "com.koski.scoreboards")]
 
     var contents: ScoreModel
+    var serialNumber = 0
 
     init() {
         contents = ScoreModel()
@@ -35,6 +36,10 @@ struct ScoreboardDocument: FileDocument {
         FileWrapper(
             regularFileWithContents: try JSONEncoder().encode(contents))
     }
+    
+    mutating func incrementSerialNumber() {
+        serialNumber += 1
+    }
 
     subscript(id: CabinetTableId) -> Table? {
         get {
@@ -42,6 +47,7 @@ struct ScoreboardDocument: FileDocument {
         }
         set {
             contents[id] = newValue
+            incrementSerialNumber()
         }
     }
 
@@ -51,6 +57,7 @@ struct ScoreboardDocument: FileDocument {
         }
         set {
             contents[table.cabinetId] = newValue
+            incrementSerialNumber()
         }
     }
 }
