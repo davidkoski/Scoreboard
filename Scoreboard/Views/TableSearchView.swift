@@ -178,6 +178,10 @@ struct TableSearchView: View {
             setTables(document.contents.tables.values)
             performSearch(search)
         }
+        .onChange(of: document.serialNumber) {
+            setTables(document.contents.tables.values)
+            performSearch(search)
+        }
         .onKeyPress { keypress in
             if keypress.key == "f" && keypress.modifiers.contains(.command) {
                 searchFocused = true
