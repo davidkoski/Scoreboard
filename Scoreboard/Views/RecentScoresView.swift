@@ -18,26 +18,30 @@ struct RecentScoresView: View {
 
     let document: ScoreboardDocument
 
-    @State private var items = [TableItem]()
+    @Binding var items: [TableItem]
+    @State private var filteredItems = [TableItem]()
 
     var body: some View {
         VStack {
-            TableListView(document: document, items: $items, showLastScoreDate: true)
+            TableListView(document: document, items: $filteredItems, showLastScoreDate: true)
         }
         .task(id: document.serialNumber) {
-            var tables = [Table]()
-            let recent = Date() - 3 * 24 * 3600
-
-            for (id, scores) in document.contents.scores {
-                if let bestScore = scores.best(), bestScore.date > recent,
-                    let table = document.contents.representative(id)
-                {
-                    tables.append(table)
-                }
-            }
-
-            self.items = tables.sorted().map { .init(table: $0, document: document) }
+            filter()
+        }
+        .onChange(of: items) {
+            filter()
         }
     }
 
+    func filter() {
+        let recent = Date() - 3 * 24 * 3600
+
+        filteredItems = items.filter { item in
+            guard let lastScoreDate = item.lastScoreDate, lastScoreDate > recent else {
+                return false
+            }
+
+            return true
+        }
+    }
 }

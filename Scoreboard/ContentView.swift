@@ -12,7 +12,12 @@ struct ContentView: View {
 
     @Binding var document: ScoreboardDocument
 
+    @State var items = [TableItem]()
+    @State var filteredItems = [TableItem]()
     @State var search = ""
+
+    @FocusState var searchFocused: Bool
+    @FocusState var viewFocused: Bool
 
     @State var busy = false
     @State var current: String?
@@ -66,9 +71,10 @@ struct ContentView: View {
             Group {
                 switch tab {
                 case .recent:
-                    RecentScoresView(document: document)
+                    RecentScoresView(document: document, items: $filteredItems)
                 case .tables:
-                    TableSearchView(document: document, path: path, search: $search)
+                    TableSearchView(
+                        document: document, path: path, search: $search, items: $filteredItems)
                 case .dups:
                     DuplicatesView(document: $document)
                 }
@@ -77,6 +83,36 @@ struct ContentView: View {
                 TableDetailView(
                     document: document, path: path, search: $search,
                     table: tableBinding(table), scores: scoreBinding(table))
+            }
+
+            // search
+            .searchable(text: $search)
+            .searchFocused($searchFocused)
+            .onChange(
+                of: search,
+                { oldValue, newValue in
+                    performSearch(newValue)
+                }
+            )
+            .onAppear {
+                setTables(document.contents.tables.values)
+                performSearch(search)
+            }
+            .onChange(of: document.serialNumber) {
+                setTables(document.contents.tables.values)
+                performSearch(search)
+            }
+            .onKeyPress { keypress in
+                if keypress.key == "f" && keypress.modifiers.contains(.command) {
+                    searchFocused = true
+                    return .handled
+                }
+                return .ignored
+            }
+            .focused($viewFocused)
+            .task {
+                // put focus on the view so cmd-f will work (as expected)
+                viewFocused = true
             }
         }
         .toolbar {
@@ -121,6 +157,21 @@ struct ContentView: View {
                 .padding()
                 .border(Color.secondary)
                 .background(Color("background"))
+            }
+        }
+    }
+
+    private func setTables(_ tables: any Sequence<Table>) {
+        self.items = tables.sorted().map { .init(table: $0, document: document) }
+    }
+
+    private func performSearch(_ search: String) {
+        if search.isEmpty {
+            filteredItems = items
+        } else {
+            let terms = search.lowercased()
+            filteredItems = items.filter { item in
+                item.table.name.lowercased().contains(terms)
             }
         }
     }

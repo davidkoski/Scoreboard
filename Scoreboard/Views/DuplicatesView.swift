@@ -66,7 +66,7 @@ struct DuplicatesView: View {
         }
 
         // update when tables changes
-        .task(id: document.contents.tables) {
+        .task(id: document.serialNumber) {
             duplicates = DuplicateTables.buildDuplicates(from: document.contents)
                 .filter { $0.value.count > 1 }
         }

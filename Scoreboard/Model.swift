@@ -8,6 +8,29 @@
 import Foundation
 import SwiftUI
 
+/// Table to be displayed in the UI
+struct TableItem: Identifiable, Equatable {
+    let table: Table
+    let scoreCount: Int
+    let score: Int
+    let rank: Int
+    let rankCount: Int
+    let lastScoreDate: Date?
+    var lastScoreDateComparable: TimeInterval { lastScoreDate?.timeIntervalSinceReferenceDate ?? 0 }
+
+    var id: CabinetTableId { table.id }
+
+    init(table: Table, document: ScoreboardDocument) {
+        self.table = table
+        let scoreboard = document.contents[table.scoreId]
+        self.scoreCount = scoreboard?.localCount ?? 0
+        self.score = scoreboard?.best()?.score ?? 0
+        self.rank = scoreboard?.rank() ?? 0
+        self.rankCount = scoreboard?.rankCount() ?? 0
+        self.lastScoreDate = scoreboard?.best()?.date
+    }
+}
+
 struct ScoreModel: Codable {
     var tableInfo = [WebTableId: TableInfo]()
     var scores = [ScoreId: TableScoreboard]()

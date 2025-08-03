@@ -36,7 +36,7 @@ struct ScoreboardDocument: FileDocument {
         FileWrapper(
             regularFileWithContents: try JSONEncoder().encode(contents))
     }
-    
+
     mutating func incrementSerialNumber() {
         serialNumber += 1
     }

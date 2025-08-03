@@ -7,28 +7,6 @@
 
 import SwiftUI
 
-struct TableItem: Identifiable {
-    let table: Table
-    let scoreCount: Int
-    let score: Int
-    let rank: Int
-    let rankCount: Int
-    let lastScoreDate: Date?
-    var lastScoreDateComparable: TimeInterval { lastScoreDate?.timeIntervalSinceReferenceDate ?? 0 }
-
-    var id: CabinetTableId { table.id }
-
-    init(table: Table, document: ScoreboardDocument) {
-        self.table = table
-        let scoreboard = document.contents[table.scoreId]
-        self.scoreCount = scoreboard?.localCount ?? 0
-        self.score = scoreboard?.best()?.score ?? 0
-        self.rank = scoreboard?.rank() ?? 0
-        self.rankCount = scoreboard?.rankCount() ?? 0
-        self.lastScoreDate = scoreboard?.best()?.date
-    }
-}
-
 struct TableListView: View {
 
     let document: ScoreboardDocument
@@ -148,14 +126,7 @@ struct TableSearchView: View {
     @Binding var path: NavigationPath
     @Binding var search: String
 
-    @State private var items = [TableItem]()
-
-    @FocusState var searchFocused: Bool
-    @FocusState var viewFocused: Bool
-
-    private func setTables(_ tables: any Sequence<Table>) {
-        self.items = tables.sorted().map { .init(table: $0, document: document) }
-    }
+    @Binding var items: [TableItem]
 
     var body: some View {
         VStack {
@@ -166,34 +137,6 @@ struct TableSearchView: View {
                 Text("Search Cabinet")
             }
         }
-        .searchable(text: $search)
-        .searchFocused($searchFocused)
-        .onChange(
-            of: search,
-            { oldValue, newValue in
-                performSearch(newValue)
-            }
-        )
-        .onAppear {
-            setTables(document.contents.tables.values)
-            performSearch(search)
-        }
-        .onChange(of: document.serialNumber) {
-            setTables(document.contents.tables.values)
-            performSearch(search)
-        }
-        .onKeyPress { keypress in
-            if keypress.key == "f" && keypress.modifiers.contains(.command) {
-                searchFocused = true
-                return .handled
-            }
-            return .ignored
-        }
-        .focused($viewFocused)
-        .task {
-            // put focus on the view so cmd-f will work (as expected)
-            viewFocused = true
-        }
     }
 
     private func showInCabinet() {
@@ -201,21 +144,4 @@ struct TableSearchView: View {
             try await PinupPopper().search(search)
         }
     }
-
-    private func performSearch(_ search: String) {
-        if search.isEmpty {
-            setTables(document.contents.tables.values)
-        } else {
-            let terms = search.lowercased()
-            setTables(
-                document.contents.tables.values
-                    .filter { table in
-                        table.name.lowercased().contains(terms)
-                    })
-            if self.items.count == 1 {
-                path.append(self.items[0].table)
-            }
-        }
-    }
-
 }

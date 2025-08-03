@@ -219,7 +219,7 @@ struct VPinStudioScanner: View {
                         nextUpdate = now + 0.25
                     }
                 }
-                
+
                 document.incrementSerialNumber()
 
             } catch {
