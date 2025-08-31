@@ -40,6 +40,17 @@ struct TableListView: View {
             }
             .width(min: 230)
 
+            TableColumn("Plays", value: \.plays.numberOfPlays) { item in
+                Text(item.plays.numberOfPlays.description)
+            }
+            .width(60)
+            TableColumn("Play Time", value: \.plays.timePlayedSecs) { item in
+                Text(item.plays.timePlayedSecs.description)
+            }
+            TableColumn("Last Play", value: \.plays.lastPlayed) { item in
+                Text(item.plays.lastPlayed.description)
+            }
+
             TableColumn("Status", value: \.table.comparableScoreStatus) { item in
                 let table = item.table
                 if table.disabled {

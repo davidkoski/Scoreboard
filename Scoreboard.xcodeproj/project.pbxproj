@@ -17,6 +17,11 @@
 		C369813C2C15497000B4A704 /* VPinStudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = C369813B2C15497000B4A704 /* VPinStudio.swift */; };
 		C369813F2C1E38F400B4A704 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C369813E2C1E38F400B4A704 /* ContentView.swift */; };
 		C36981432C1E4C2900B4A704 /* ScoreEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36981422C1E4C2900B4A704 /* ScoreEntry.swift */; };
+		C369D99C2E4086BB003191D1 /* Domain.swift in Sources */ = {isa = PBXBuildFile; fileRef = C369D99B2E4086BB003191D1 /* Domain.swift */; };
+		C39348052E63EC4300C216D1 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C39348042E63EC4300C216D1 /* CalendarView.swift */; };
+		C39348072E63EC4C00C216D1 /* TimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C39348062E63EC4C00C216D1 /* TimeView.swift */; };
+		C39348092E63EEED00C216D1 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = C39348082E63EEED00C216D1 /* AppIcon.icon */; };
+		C393480B2E63F6A800C216D1 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = C393480A2E63F6A800C216D1 /* Util.swift */; };
 		C3A4102E2C6EE33B00E47F63 /* VPinStudioScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3A4102D2C6EE33B00E47F63 /* VPinStudioScanner.swift */; };
 		C3A410302C6EE83C00E47F63 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3A4102F2C6EE83C00E47F63 /* Configuration.swift */; };
 		C3A410322C6EE89A00E47F63 /* DuplicatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3A410312C6EE89A00E47F63 /* DuplicatesView.swift */; };
@@ -54,6 +59,11 @@
 		C369813D2C1CDE2E00B4A704 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		C369813E2C1E38F400B4A704 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		C36981422C1E4C2900B4A704 /* ScoreEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreEntry.swift; sourceTree = "<group>"; };
+		C369D99B2E4086BB003191D1 /* Domain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Domain.swift; sourceTree = "<group>"; };
+		C39348042E63EC4300C216D1 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
+		C39348062E63EC4C00C216D1 /* TimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeView.swift; sourceTree = "<group>"; };
+		C39348082E63EEED00C216D1 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
+		C393480A2E63F6A800C216D1 /* Util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 		C3A4102D2C6EE33B00E47F63 /* VPinStudioScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VPinStudioScanner.swift; sourceTree = "<group>"; };
 		C3A4102F2C6EE83C00E47F63 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		C3A410312C6EE89A00E47F63 /* DuplicatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicatesView.swift; sourceTree = "<group>"; };
@@ -130,6 +140,8 @@
 				C3D0AAE92C06AFBB00B8BD73 /* TableDetailView.swift */,
 				C3D0AABE2C05593F00B8BD73 /* TableSearchView.swift */,
 				C3A410312C6EE89A00E47F63 /* DuplicatesView.swift */,
+				C39348042E63EC4300C216D1 /* CalendarView.swift */,
+				C39348062E63EC4C00C216D1 /* TimeView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -167,6 +179,7 @@
 		C3D0AABB2C05593F00B8BD73 /* Scoreboard */ = {
 			isa = PBXGroup;
 			children = (
+				C393480A2E63F6A800C216D1 /* Util.swift */,
 				C324CAE22E3ECB68002A266E /* Views */,
 				C33F11E62CC4267C00761777 /* Clients */,
 				C3D0AAC42C05594000B8BD73 /* Scoreboard.entitlements */,
@@ -182,6 +195,8 @@
 				C3D0AAC52C05594000B8BD73 /* Preview Content */,
 				C33173D92C1F9AEA000D1058 /* ScoreboardDocument.swift */,
 				C3A4102F2C6EE83C00E47F63 /* Configuration.swift */,
+				C369D99B2E4086BB003191D1 /* Domain.swift */,
+				C39348082E63EEED00C216D1 /* AppIcon.icon */,
 			);
 			path = Scoreboard;
 			sourceTree = "<group>";
@@ -305,6 +320,7 @@
 			files = (
 				C3D0AAC72C05594000B8BD73 /* Preview Assets.xcassets in Resources */,
 				C3D0AAC32C05594000B8BD73 /* Assets.xcassets in Resources */,
+				C39348092E63EEED00C216D1 /* AppIcon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -332,11 +348,15 @@
 				C3D0AACF2C055A6900B8BD73 /* Camera.swift in Sources */,
 				C3D0AABF2C05593F00B8BD73 /* TableSearchView.swift in Sources */,
 				C33173DA2C1F9AEA000D1058 /* ScoreboardDocument.swift in Sources */,
+				C39348052E63EC4300C216D1 /* CalendarView.swift in Sources */,
 				C369813C2C15497000B4A704 /* VPinStudio.swift in Sources */,
 				C3A410322C6EE89A00E47F63 /* DuplicatesView.swift in Sources */,
 				C3D0AAE22C057C4300B8BD73 /* PinupPopper.swift in Sources */,
+				C369D99C2E4086BB003191D1 /* Domain.swift in Sources */,
 				C3CB07042CE9AC3600AD650F /* Duplicates.swift in Sources */,
+				C393480B2E63F6A800C216D1 /* Util.swift in Sources */,
 				C3A410302C6EE83C00E47F63 /* Configuration.swift in Sources */,
+				C39348072E63EC4C00C216D1 /* TimeView.swift in Sources */,
 				C3D0AAD62C056C6300B8BD73 /* CountedSet.swift in Sources */,
 				C3D0AABD2C05593F00B8BD73 /* ScoreboardApp.swift in Sources */,
 				C31424732C07F21900D34880 /* RecentScoresView.swift in Sources */,
@@ -522,6 +542,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Scoreboard/Scoreboard.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -542,10 +563,10 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.koski.Scoreboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -562,6 +583,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Scoreboard/Scoreboard.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -582,10 +604,10 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.koski.Scoreboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";

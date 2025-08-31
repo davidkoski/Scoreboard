@@ -13,7 +13,11 @@ public struct Day: Codable, Hashable, Sendable, CodingKeyRepresentable, CodingKe
     public let value: Int
 
     public var description: String {
-        "\(month)/\(day)/\(year)"
+        if value == 0 {
+            "-"
+        } else {
+            "\(month)/\(day)/\(year)"
+        }
     }
 
     public var date: Date {
