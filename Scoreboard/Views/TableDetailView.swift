@@ -52,6 +52,61 @@ struct TableDetailView: View {
         }
     }
 
+    func showPlays() -> some View {
+        struct Row: Identifiable, Comparable {
+            let title: String
+            let score: Activity.Snapshot
+            var id: CabinetTableId
+
+            init(_ table: Table, document: ScoreboardDocument) {
+                self.title = table.variant
+                self.id = table.id
+                self.score = document.contents.activity.snapshot(table) ?? .zero
+            }
+
+            init(sum: Activity.Snapshot) {
+                self.title = "ALL"
+                self.id = .init(stringValue: "ALL")!
+                self.score = sum
+            }
+
+            static func < (lhs: Row, rhs: Row) -> Bool {
+                lhs.score.lastPlayed < rhs.score.lastPlayed
+            }
+        }
+        var data = document.contents.variations(table).map { Row($0, document: document) }
+        if data.count > 1 {
+            data.append(.init(sum: data.reduce(.zero) { $0 + $1.score }))
+        }
+
+        return VStack {
+            LazyVGrid(
+                columns: [
+                    GridItem(.flexible(minimum: 200), alignment: .leading),
+                    GridItem(.fixed(40), alignment: .trailing),
+                    GridItem(.fixed(80), alignment: .trailing),
+                    GridItem(.fixed(80), alignment: .trailing),
+                ], spacing: 8
+            ) {
+                Group {
+                    Text("Variant").bold()
+                    Text("Plays").bold()
+                    Text("Time").bold()
+                    Text("Last").bold()
+                }
+
+                ForEach(data) { item in
+                    Text(item.title)
+                    Text(item.score.numberOfPlays.description)
+                    Text(item.score.timePlayedSecs.description)
+                    Text(item.score.lastPlayed.description)
+                }
+            }
+            .padding(3)
+            .border(.primary)
+        }
+    }
+
     var body: some View {
         VStack {
             HStack {
@@ -77,6 +132,8 @@ struct TableDetailView: View {
                             .font(.headline)
 
                         scoreStatus
+
+                        showPlays()
 
                         Spacer()
                     }

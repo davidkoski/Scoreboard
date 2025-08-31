@@ -26,6 +26,8 @@ struct ContentView: View {
     enum Tab: String, Hashable, CaseIterable, Identifiable {
         case recent
         case tables
+        case calendar
+        case time
         case dups
 
         var id: String { rawValue }
@@ -34,6 +36,8 @@ struct ContentView: View {
             switch self {
             case .recent: "clock"
             case .tables: "table.furniture"
+            case .calendar: "calendar"
+            case .time: "clock"
             case .dups: "square.stack"
             }
         }
@@ -75,6 +79,10 @@ struct ContentView: View {
                 case .tables:
                     TableSearchView(
                         document: document, path: path, search: $search, items: $filteredItems)
+                case .calendar:
+                    CalendarView(document: document, items: $filteredItems)
+                case .time:
+                    TimeView(document: document, items: $filteredItems)
                 case .dups:
                     DuplicatesView(document: $document)
                 }

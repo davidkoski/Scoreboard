@@ -98,9 +98,11 @@ struct TableListView: View {
             Toggle(isOn: $playable) {
                 Image(systemName: "hand.thumbsup")
             }
+            .help("show only playable games")
             Button(action: nextVR) {
                 Image(systemName: vr.imageName)
             }
+            .help("cycle through types of VR games")
         }
         .task {
             if showLastScoreDate {

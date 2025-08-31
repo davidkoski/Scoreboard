@@ -18,6 +18,9 @@ struct TableItem: Identifiable, Equatable {
     let lastScoreDate: Date?
     var lastScoreDateComparable: TimeInterval { lastScoreDate?.timeIntervalSinceReferenceDate ?? 0 }
 
+    let plays: Activity.Snapshot
+    let daysPlayed: [Activity.FilteredDayRecord]
+
     var id: CabinetTableId { table.id }
 
     init(table: Table, document: ScoreboardDocument) {
@@ -28,6 +31,8 @@ struct TableItem: Identifiable, Equatable {
         self.rank = scoreboard?.rank() ?? 0
         self.rankCount = scoreboard?.rankCount() ?? 0
         self.lastScoreDate = scoreboard?.best()?.date
+        self.plays = document.contents.activity.snapshot(table) ?? .init()
+        self.daysPlayed = document.contents.activity.days(table)
     }
 }
 
@@ -85,6 +90,12 @@ struct ScoreModel: Codable {
         }
     }
 
+    public subscript(key: WebTableId) -> Table? {
+        get {
+            tablesByWebId[key]?.first { !$0.disabled }
+        }
+    }
+
     public subscript(key: ScoreId) -> TableScoreboard? {
         get { scores[key] }
         set { scores[key] = newValue }
@@ -125,6 +136,10 @@ struct ScoreModel: Codable {
             return table
         }
         return tablesByScoreId[scoreId]?.first
+    }
+
+    public func variations(_ table: Table) -> [Table] {
+        tablesByWebId[table.webId] ?? []
     }
 
     private mutating func updateIndex(old: Table?, new: Table?) {
@@ -281,6 +296,14 @@ struct Table: Identifiable, Comparable, Hashable, Codable {
 
     var longDisplayName: String { longName ?? name }
 
+    var variant: String {
+        if let longName {
+            return String(longName.dropFirst(name.count))
+        } else {
+            return ""
+        }
+    }
+
     /// numeric identifier (row id) for cabinet database
     var cabinetId: CabinetTableId
 
@@ -377,34 +400,47 @@ struct Table: Identifiable, Comparable, Hashable, Codable {
 /// Record of tables played by day
 struct Activity: Codable {
 
-    static func dateCode(_ date: Date) -> Int {
-        let calendar = Calendar.current
-        let year = calendar.component(.year, from: date)
-        let month = calendar.component(.month, from: date)
-        let day = calendar.component(.day, from: date)
-        return year * 100 * 100 + month * 100 + day
-    }
+    struct Snapshot: Codable, Equatable, AdditiveArithmetic {
 
-    static func dateFromCode(_ code: Int) -> Date {
-        DateComponents(year: code / 10000, month: (code % 10000) / 100, day: code % 100).date!
-    }
-
-    struct Snapshot: Codable, Equatable {
-        var lastPlayed: Int
+        var lastPlayed: Day
         var numberOfPlays: Int
-        var timePlayedSecs: Int
+        var timePlayedSecs: Seconds
+
+        static var zero = Self.init()
 
         init(_ activity: VPinStudio.Activity) {
-            self.lastPlayed = dateCode(activity.lastPlayed)
+            self.lastPlayed = Day(activity.lastPlayed)
             self.numberOfPlays = activity.numberOfPlays
-            self.timePlayedSecs = activity.timePlayedSecs
+            self.timePlayedSecs = Seconds(activity.timePlayedSecs)
+        }
+
+        init() {
+            lastPlayed = .init(intValue: 0)!
+            numberOfPlays = 0
+            timePlayedSecs = 0
+        }
+
+        static func + (lhs: Activity.Snapshot, rhs: Activity.Snapshot) -> Activity.Snapshot {
+            var new = Self.zero
+            new.lastPlayed = max(lhs.lastPlayed, rhs.lastPlayed)
+            new.numberOfPlays = lhs.numberOfPlays + rhs.numberOfPlays
+            new.timePlayedSecs = lhs.timePlayedSecs + rhs.timePlayedSecs
+            return new
+        }
+
+        static func - (lhs: Activity.Snapshot, rhs: Activity.Snapshot) -> Activity.Snapshot {
+            var new = lhs
+            new.lastPlayed = min(lhs.lastPlayed, rhs.lastPlayed)
+            new.numberOfPlays -= rhs.numberOfPlays
+            new.timePlayedSecs -= rhs.timePlayedSecs
+            return new
         }
     }
 
     struct Play: Codable, Equatable, Comparable {
-        var timePlayedSecs = 0
+        var timePlayedSecs: Seconds = 0
 
-        mutating func record(seconds: Int) {
+        mutating func record(seconds: Seconds) {
             timePlayedSecs += seconds
         }
 
@@ -414,10 +450,17 @@ struct Activity: Codable {
     }
 
     struct DayRecord: Codable, Equatable, Comparable {
-        var dateCode: Int
+        var dateCode: Day
         var tablesPlayed: Int
-        var secondsPlayed: Int
+        var secondsPlayed: Seconds
         var plays: [WebTableId: Play]
+
+        init(day: Day) {
+            self.dateCode = day
+            self.tablesPlayed = 0
+            self.secondsPlayed = 0
+            self.plays = [:]
+        }
 
         init(_ snapshot: Snapshot) {
             self.dateCode = snapshot.lastPlayed
@@ -438,8 +481,31 @@ struct Activity: Codable {
         }
     }
 
+    struct FilteredDayRecord: Codable, Equatable, Comparable {
+        var dateCode: Day
+        var secondsPlayed: Seconds
+
+        init?(_ record: DayRecord, id: WebTableId) {
+            guard let play = record.plays[id] else { return nil }
+            self.dateCode = record.dateCode
+            self.secondsPlayed = play.timePlayedSecs
+        }
+
+        static func < (lhs: Activity.FilteredDayRecord, rhs: Activity.FilteredDayRecord) -> Bool {
+            lhs.dateCode < rhs.dateCode
+        }
+    }
+
     var snapshots = [CabinetTableId: Snapshot]()
     var days = [DayRecord]()
+
+    func snapshot(_ table: Table) -> Snapshot? {
+        snapshots[table.cabinetId]
+    }
+
+    func days(_ table: Table) -> [FilteredDayRecord] {
+        days.compactMap { FilteredDayRecord($0, id: table.webId) }
+    }
 
     mutating func record(_ activities: [VPinStudio.Activity], tables: [CabinetTableId: Table]) {
         guard !snapshots.isEmpty else {
