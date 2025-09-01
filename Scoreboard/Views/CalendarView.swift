@@ -55,6 +55,9 @@ struct CalendarView: View {
 
     var body: some View {
         VStack(spacing: 20) {
+            let daysInMonth = self.daysInMonth
+            let activities = self.activities(daysInMonth)
+
             HStack {
                 Button(action: previousMonth) {
                     Image(systemName: "chevron.left")
@@ -64,9 +67,15 @@ struct CalendarView: View {
 
                 Spacer()
 
-                Text(currentMonth)
-                    .font(.title2)
-                    .fontWeight(.semibold)
+                HStack {
+                    Text(currentMonth)
+                        .font(.title2)
+                        .fontWeight(.semibold)
+
+                    let plays = activities.values.reduce(0) { $0 + $1.tablesPlayed }
+                    let time = activities.values.reduce(0) { $0 + $1.secondsPlayed }
+                    Text("– \(time), \(plays) games")
+                }
 
                 Spacer()
 
@@ -93,8 +102,6 @@ struct CalendarView: View {
                         .frame(height: 40)
                 }
 
-                let daysInMonth = self.daysInMonth
-                let activities = self.activities(daysInMonth)
                 ForEach(daysInMonth, id: \.self) { date in
                     let day = Day(date)
                     CalendarDayView(
@@ -119,6 +126,7 @@ struct CalendarView: View {
 
             Spacer()
         }
+        .padding(.top)
     }
 
     private func previousMonth() {

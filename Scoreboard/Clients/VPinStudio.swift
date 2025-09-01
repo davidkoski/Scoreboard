@@ -49,7 +49,7 @@ public struct VPinStudio {
 
     let listURL = URL(string: "\(CABINET_URL):\(VPIN_STUDIO_PORT)/api/v1/games/knowns/-1")!
 
-    let detailsURL = URL(string: "\(CABINET_URL):\(VPIN_STUDIO_PORT)/api/v1/popper/tabledetails")!
+    let detailsURL = URL(string: "\(CABINET_URL):\(VPIN_STUDIO_PORT)/api/v1/frontend/tabledetails")!
 
     let activityURL = URL(string: "\(CABINET_URL):\(VPIN_STUDIO_PORT)/api/v1/alx")!
 
@@ -187,7 +187,88 @@ public struct VPinStudio {
         }
     }
 
-    public struct TableDetails: Decodable {
+    /**
+
+    ```json
+     {
+       "rom": "meteorb",
+       "romAlias": null,
+       "scannedRom": "meteorb",
+       "scannedAltRom": null,
+       "gameDisplayName": "Meteor (Stern 1979) Bord 1.0.0a VR",
+       "gameFileName": "Meteor (Stern 1979) Bord 1.0.0a VR.vpx",
+       "gameName": "Meteor (Stern 1979)",
+       "tableName": null,
+       "version": "1.0.0a",
+       "disabled": false,
+       "updateAvailable": false,
+       "dateAdded": 1716325101648,
+       "dateUpdated": 1744686253045,
+       "id": 875,
+       "nvOffset": 0,
+       "hsFileName": null,
+       "scannedHsFileName": null,
+       "cardDisabled": false,
+       "patchVersion": null,
+       "gameStatus": 1,
+       "emulatorId": 1,
+       "validationState": {
+         "code": 7,
+         "options": []
+       },
+       "hasMissingAssets": false,
+       "hasOtherIssues": false,
+       "validScoreConfiguration": true,
+       "ignoredValidations": [],
+       "highscoreType": "NVRam",
+       "altSoundAvailable": false,
+       "altColorType": null,
+       "competitionTypes": [],
+       "nbDirectB2S": 1,
+       "defaultBackgroundAvailable": true,
+       "eventLogAvailable": true,
+       "pupPackName": null,
+       "templateId": null,
+       "extTableId": "FrfsSwGv",
+       "extTableVersionId": "JJV0r5tW",
+       "extVersion": "1.0.0a",
+       "comment": null,
+       "launcher": "vpinballx.exe",
+       "numberPlayed": 22,
+       "foundControllerStop": true,
+       "foundTableExit": true,
+       "vrRoomSupport": true,
+       "vrRoomEnabled": false,
+       "rating": 4,
+       "dmdgameName": null,
+       "vpsUpdates": {
+         "changes": [
+           {
+             "diffType": "rom",
+             "id": "6CqzoD8qpc"
+           }
+         ],
+         "empty": false
+       },
+       "romRequired": true,
+       "romExists": true,
+       "vpxGame": true,
+       "dmdtype": null,
+       "dmdprojectFolder": null,
+       "fpGame": false,
+       "gameFilePath": "D:\\vpx\\vPinball\\visualpinball\\Tables\\Meteor (Stern 1979) Bord 1.0.0a VR.vpx",
+       "directB2SPath": "D:\\vpx\\vPinball\\visualpinball\\Tables\\Meteor (Stern 1979) Bord 1.0.0a VR.directb2s",
+       "fxGame": false,
+       "modified": 1730962734461,
+       "gameFileSize": 93507584,
+       "iniPath": "D:\\vpx\\vPinball\\visualpinball\\Tables\\Meteor (Stern 1979) Bord 1.0.0a VR.ini",
+       "povPath": null,
+       "resPath": "D:\\vpx\\vPinball\\visualpinball\\Tables\\Meteor (Stern 1979) Bord 1.0.0a VR.res"
+     },
+     ```
+
+     */
+    public struct TableListItem: Decodable {
         /// unique identifier for table, e.g. sMBqx5fp.  This is the identifier from the ``PinballDB``
         let webId: WebTableId
 
@@ -240,11 +321,127 @@ public struct VPinStudio {
         var scoreId: ScoreId { ScoreId(self) }
     }
 
-    public func getTablesList() async throws -> [TableDetails] {
+    /**
+
+     http://pinbot.local:8089/api/v1/frontend/tabledetails/129
+
+    ```json
+     {
+       "sqlVersion": 64,
+       "emulatorId": 1,
+       "status": 1,
+       "gameName": "The Addams Family (Bally 1992)",
+       "gameFileName": "The Addams Family (Bally 1992) G5k 2.4.41 VR.vpx",
+       "gameDisplayName": "The Addams Family (Bally 1992) G5k 2.4.41 VR",
+       "gameType": "SS",
+       "gameVersion": "2.4.41",
+       "dateAdded": 1714194095441,
+       "dateModified": 1743395603391,
+       "gameTheme": "Celebrities,Fictional,Licensed Theme,Movie",
+       "notes": null,
+       "gameYear": 1992,
+       "romName": "taf_l7",
+       "manufacturer": "Bally",
+       "numberOfPlayers": 4,
+       "lastPlayed": 1753848481661,
+       "numberPlays": 47,
+       "tags": "",
+       "category": "",
+       "author": "G5k, 3rdAxis, SliderPoint, VPW, DarthVito, Fluffhead35, DaRdog81, Passion4pins, RobbyKingPin, ClarkKent, TastyWasps, DGrimmReaper, Iaakki",
+       "volume": null,
+       "launchCustomVar": null,
+       "keepDisplays": "",
+       "gameRating": 5,
+       "dof": null,
+       "altRunMode": "",
+       "url": "http://www.ipdb.org/machine.cgi?id=20",
+       "designedBy": "Pat Lawlor",
+       "altLaunchExe": null,
+       "custom2": null,
+       "custom3": "Wq40ng8f",
+       "special": null,
+       "mediaSearch": "",
+       "custom4": null,
+       "custom5": null,
+       "webGameId": "aT_GONvw",
+       "romAlt": null,
+       "webLink2Url": null,
+       "tourneyId": null,
+       "mod": false,
+       "gDetails": "VPS Comment:\nG5k Version\n\nPress F6 to configure MODs (disable exclusive to access)\n\nFor DMD colorization: http://vpuniverse.com/forums/topic/3746-the-addams-family-colorization/\n\nThanks to DJRobX and those who helped test.\n",
+       "gNotes": null,
+       "gLog": null,
+       "gPlayLog": null,
+       "hsFilename": null,
+       "launcherList": [
+         "VPinball8.exe",
+         "VPinball921.exe",
+         "VPinball995.exe",
+         "VPinball99_PhysMod5_Updated.exe",
+         "VPinballX.exe",
+         "VPinballX106.exe",
+         "VPinballX1074.exe",
+         "VPinballX107_32bit.exe",
+         "VPinballX64.exe",
+         "VPinballX_GL64.exe"
+       ],
+       "ipdbnum": "20",
+       "popper15": true
+     }
+     ```
+
+     */
+    public struct TableDetails: Decodable {
+        let webGameId: WebTableId?
+
+        let gameYear: Int
+
+        enum GameType: String, Codable {
+            case SS
+            case EM
+        }
+        let gameType: GameType
+        let manufacturer: String
+
+        let gameTheme: String?
+        var gameThemes: Set<String> {
+            if let gameTheme {
+                Set(gameTheme.components(separatedBy: ","))
+            } else {
+                []
+            }
+        }
+
+        let author: String
+        var firstAuthor: String { author.components(separatedBy: ",")[0] }
+
+        let designedBy: String?
+        var designers: Set<String> {
+            if let designedBy {
+                Set(designedBy.components(separatedBy: ","))
+            } else {
+                []
+            }
+        }
+    }
+
+    public func getTablesList() async throws -> [TableListItem] {
         let request = URLRequest(url: listURL)
         let (data, _) = try await localSession.data(for: request)
 
-        return try JSONDecoder().decode([TableDetails].self, from: data)
+        return try JSONDecoder().decode([TableListItem].self, from: data)
+    }
+
+    public func getTablesDetail(cabinetId: CabinetTableId) async throws -> TableDetails {
+        let url = detailsURL.appendingPathComponent(cabinetId.stringValue)
+        do {
+            let request = URLRequest(url: url)
+            let (data, _) = try await localSession.data(for: request)
+
+            return try JSONDecoder().decode(TableDetails.self, from: data)
+        } catch {
+            throw WrappedError(base: error, url: url)
+        }
     }
 
     public struct VPinManiaScores: Decodable {

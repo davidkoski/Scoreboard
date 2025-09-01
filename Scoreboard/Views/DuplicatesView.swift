@@ -39,7 +39,7 @@ struct DuplicatesView: View {
                 ForEach(duplicates, id: \.key) { key, tables in
                     let disposition = tables.disposition
                     NavigationLink(value: key) {
-                        Text("\(key) (\(tables.count))")
+                        Text("\(String(describing: key)) (\(tables.count))")
 
                         switch disposition {
                         case .allMatch: Text(" all match")

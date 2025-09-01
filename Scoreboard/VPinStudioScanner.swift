@@ -70,11 +70,62 @@ struct VPinStudioScanner: View {
                     }
                 }
 
+                await scanTableDetails()
+
             } catch {
                 print("Unable to scanTables: \(error)")
                 messages.append("Failed: \(error)")
             }
             busy = false
+        }
+    }
+
+    private func scanTableDetails() async {
+        let client = VPinStudio()
+        do {
+            try await withThrowingTaskGroup(of: (Table, VPinStudio.TableDetails)?.self) { group in
+                current = "Sending requests..."
+
+                for table in document.contents.tables.values {
+
+                    group.addTask {
+                        if table.disabled {
+                            // skip -- disabled or deleted
+                            return nil
+                        }
+
+                        let details = try await client.getTablesDetail(cabinetId: table.cabinetId)
+
+                        return (table, details)
+                    }
+                }
+
+                // now merge the scores in to the document
+                let count = document.contents.tables.count
+                var i = 0
+
+                var nextUpdate = Date.timeIntervalSinceReferenceDate
+
+                for try await pair in group {
+                    i += 1
+
+                    let now = Date.timeIntervalSinceReferenceDate
+                    if now >= nextUpdate {
+                        current = "\(i)/\(count)"
+                        nextUpdate = now + 0.25
+                    }
+
+                    if let (table, details) = pair {
+                        if document[table.cabinetId]?.update(details) ?? false {
+                            messages.append("Update \(table.longDisplayName)")
+                        }
+                    }
+                }
+                document.incrementSerialNumber()
+            }
+        } catch {
+            print("Unable to scan table details: \(error)")
+            messages.append("scan table details failed: \(error)")
         }
     }
 

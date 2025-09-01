@@ -34,7 +34,7 @@ struct ContentView: View {
 
         var systemImage: String {
             switch self {
-            case .recent: "clock"
+            case .recent: "numbers.rectangle"
             case .tables: "table.furniture"
             case .calendar: "calendar"
             case .time: "clock"
@@ -124,13 +124,12 @@ struct ContentView: View {
             }
         }
         .toolbar {
-            ForEach(Tab.allCases) { tab in
-                Button(action: { self.tab = tab }) {
-                    Image(systemName: tab.systemImage)
+            Picker("", selection: $tab) {
+                ForEach(Tab.allCases) { tab in
+                    Image(systemName: tab.systemImage).tag(tab)
                 }
-                .buttonStyle(.plain)
-                .bold(self.tab == tab)
             }
+            .pickerStyle(.segmented)
             VPinStudioScanner(
                 document: $document, busy: $busy, current: $current, messages: $messages)
             Button(action: selectCurrent) {
@@ -156,6 +155,7 @@ struct ContentView: View {
                                 Text(message)
                             }
                         }
+                        .textSelection(.enabled)
 
                         Button(action: { messages.removeAll() }) {
                             Text("OK")

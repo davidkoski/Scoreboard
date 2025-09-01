@@ -271,7 +271,7 @@ struct TableScoreboard: Codable, Equatable {
     }
 }
 
-private func vrType(_ table: VPinStudio.TableDetails) -> Table.VR {
+private func vrType(_ table: VPinStudio.TableListItem) -> Table.VR {
     let name = table.gameDisplayName ?? ""
     if name.hasSuffix("VR") {
         return .full
@@ -318,6 +318,13 @@ struct Table: Identifiable, Comparable, Hashable, Codable {
     /// table is disabled in the cabinet
     var disabled: Bool
 
+    var gameYear: Int
+    var gameType: VPinStudio.TableDetails.GameType
+    var manufacturer: String
+    var gameThemes: Set<String>
+    var firstAuthor: String
+    var designers: Set<String>
+
     enum VR: Codable, CaseIterable {
         case full
         case partial
@@ -351,7 +358,7 @@ struct Table: Identifiable, Comparable, Hashable, Codable {
             .replacingOccurrences(of: "jp's ", with: "")
     }
 
-    init(table: VPinStudio.TableDetails) {
+    init(table: VPinStudio.TableListItem) {
         self.webId = table.webId
         self.name = table.gameName
         self.longName = table.gameDisplayName
@@ -360,14 +367,21 @@ struct Table: Identifiable, Comparable, Hashable, Codable {
         self.scoreId = table.scoreId
         self.disabled = table.disabled
         self.vr = vrType(table)
+
+        self.gameYear = 0
+        self.gameType = .SS
+        self.manufacturer = ""
+        self.gameThemes = []
+        self.firstAuthor = ""
+        self.designers = []
     }
 
-    public mutating func update(_ other: VPinStudio.TableDetails) -> Bool {
+    public mutating func update(_ other: VPinStudio.TableListItem) -> Bool {
         var changed = false
 
         func update<V: Equatable>(
             _ keypath: WritableKeyPath<Table, V>,
-            _ otherKeypath: KeyPath<VPinStudio.TableDetails, V>
+            _ otherKeypath: KeyPath<VPinStudio.TableListItem, V>
         ) {
             if self[keyPath: keypath] != other[keyPath: otherKeypath] {
                 changed = true
@@ -388,6 +402,29 @@ struct Table: Identifiable, Comparable, Hashable, Codable {
             changed = true
             self.vr = vr
         }
+
+        return changed
+    }
+
+    public mutating func update(_ other: VPinStudio.TableDetails) -> Bool {
+        var changed = false
+
+        func update<V: Equatable>(
+            _ keypath: WritableKeyPath<Table, V>,
+            _ otherKeypath: KeyPath<VPinStudio.TableDetails, V>
+        ) {
+            if self[keyPath: keypath] != other[keyPath: otherKeypath] {
+                changed = true
+                self[keyPath: keypath] = other[keyPath: otherKeypath]
+            }
+        }
+
+        update(\.gameYear, \.gameYear)
+        update(\.gameType, \.gameType)
+        update(\.manufacturer, \.manufacturer)
+        update(\.gameThemes, \.gameThemes)
+        update(\.firstAuthor, \.firstAuthor)
+        update(\.designers, \.designers)
 
         return changed
     }

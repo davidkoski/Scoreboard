@@ -97,7 +97,7 @@ public struct ScoreId: Codable, Hashable, Sendable, Identifiable, Comparable,
         self.offset = offset
     }
 
-    public init(_ table: VPinStudio.TableDetails) {
+    public init(_ table: VPinStudio.TableListItem) {
         switch table.highscoreType {
         case .nvram:
             self.name = table.rom
