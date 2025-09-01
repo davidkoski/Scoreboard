@@ -177,9 +177,8 @@ struct ContentView: View {
         if search.isEmpty {
             filteredItems = items
         } else {
-            let terms = search.lowercased()
             filteredItems = items.filter { item in
-                item.table.name.lowercased().contains(terms)
+                item.table.matches(search)
             }
         }
     }

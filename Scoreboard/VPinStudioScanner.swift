@@ -89,11 +89,6 @@ struct VPinStudioScanner: View {
                 for table in document.contents.tables.values {
 
                     group.addTask {
-                        if table.disabled {
-                            // skip -- disabled or deleted
-                            return nil
-                        }
-
                         let details = try await client.getTablesDetail(cabinetId: table.cabinetId)
 
                         return (table, details)

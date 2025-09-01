@@ -318,6 +318,10 @@ public struct VPinStudio {
             self.disabled = try container.decode(Bool.self, forKey: .disabled)
         }
 
+        var shortName: String {
+            gameName.components(separatedBy: "(")[0]
+        }
+
         var scoreId: ScoreId { ScoreId(self) }
     }
 

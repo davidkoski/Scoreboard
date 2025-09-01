@@ -29,95 +29,123 @@ struct TableListView: View {
     }
 
     var body: some View {
-        SwiftUI.Table(filteredItems(), sortOrder: $sortOrder) {
-            TableColumn("Table", value: \.table.name) { item in
-                let table = item.table
-                NavigationLink(value: table) {
-                    Image(systemName: table.vr.imageName)
-                    Spacer().frame(width: 4)
-                    Text(table.name).italic(table.disabled)
-                }
-            }
-            .width(min: 230)
+        VStack {
+            let filteredItems = filteredItems()
 
-            TableColumn("Plays", value: \.plays.numberOfPlays) { item in
-                Text(item.plays.numberOfPlays.description)
-            }
-            .width(60)
-            TableColumn("Play Time", value: \.plays.timePlayedSecs) { item in
-                Text(item.plays.timePlayedSecs.description)
-            }
-            TableColumn("Last Play", value: \.plays.lastPlayed) { item in
-                Text(item.plays.lastPlayed.description)
-            }
-
-            TableColumn("Status", value: \.table.comparableScoreStatus) { item in
-                let table = item.table
-                if table.disabled {
-                    Text("disabled").italic()
-                } else {
-                    Text(table.scoreStatus?.rawValue ?? "-")
-                }
-            }
-            TableColumn("Type", value: \.table.comparableScoreType) { item in
-                let table = item.table
-                Text(table.scoreType?.rawValue ?? "-")
-            }
-            TableColumn("Score", value: \.score) { item in
-                if item.score == 0 {
-                    Text("-")
-                } else {
-                    Text(item.score.formatted())
-                }
-            }
-            TableColumn("Rank", value: \.rank) { item in
-                if item.rank == 0 {
-                    if item.rankCount > 0 {
-                        Text("- / \(item.rankCount.formatted())")
-                    } else {
-                        Text("-")
+            SwiftUI.Table(filteredItems, sortOrder: $sortOrder) {
+                Group {
+                    TableColumn("Table \(filteredItems.count)", value: \TableItem.table.name) {
+                        item in
+                        let table = item.table
+                        NavigationLink(value: table) {
+                            Image(systemName: table.vr.imageName)
+                            Spacer().frame(width: 4)
+                            Text(table.name).italic(table.disabled)
+                        }
                     }
-                } else {
-                    Text("\(item.rank.formatted()) / \(item.rankCount.formatted())")
-                }
-            }
-            .width(60)
+                    .width(min: 230)
 
-            TableColumn("Count", value: \.scoreCount) { item in
-                if item.scoreCount == 0 {
-                    Text("-")
-                } else {
-                    Text(item.scoreCount.formatted())
-                }
-            }
-            .width(60)
-
-            if showLastScoreDate {
-                TableColumn("Last Score", value: \.lastScoreDateComparable) { item in
-                    if let lastScoreDate = item.lastScoreDate {
-                        Text(lastScoreDate.formatted(date: .numeric, time: .omitted))
-                    } else {
-                        Text("-")
+                    TableColumn("Year", value: \TableItem.table.gameYear) { item in
+                        Text(item.table.gameYear.description)
+                    }
+                    TableColumn("Manufacturer", value: \TableItem.table.manufacturer) { item in
+                        Text(item.table.manufacturer)
+                    }
+                    TableColumn("Author", value: \TableItem.table.firstAuthor) { item in
+                        Text(item.table.firstAuthor)
                     }
                 }
+
+                Group {
+                    TableColumn("Plays", value: \TableItem.plays.numberOfPlays) { item in
+                        Text(item.plays.numberOfPlays.description)
+                    }
+                    .width(60)
+                    TableColumn("Play Time", value: \TableItem.plays.timePlayedSecs) { item in
+                        Text(item.plays.timePlayedSecs.description)
+                    }
+                    TableColumn("Last Play", value: \TableItem.plays.lastPlayed) { item in
+                        Text(item.plays.lastPlayed.description)
+                    }
+                }
+
+                Group {
+                    TableColumn("Status", value: \TableItem.table.comparableScoreStatus) { item in
+                        let table = item.table
+                        if table.disabled {
+                            Text("disabled").italic()
+                        } else {
+                            Text(table.scoreStatus?.rawValue ?? "-")
+                        }
+                    }
+                    TableColumn("Type", value: \TableItem.table.comparableScoreType) { item in
+                        let table = item.table
+                        Text(table.scoreType?.rawValue ?? "-")
+                    }
+                }
+
+                Group {
+                    TableColumn("Score", value: \TableItem.score) { item in
+                        if item.score == 0 {
+                            Text("-")
+                        } else {
+                            Text(item.score.formatted())
+                        }
+                    }
+                    TableColumn("Rank", value: \TableItem.rank) { item in
+                        if item.rank == 0 {
+                            if item.rankCount > 0 {
+                                Text("- / \(item.rankCount.formatted())")
+                            } else {
+                                Text("-")
+                            }
+                        } else {
+                            Text("\(item.rank.formatted()) / \(item.rankCount.formatted())")
+                        }
+                    }
+                    .width(60)
+
+                    TableColumn("Count", value: \TableItem.scoreCount) { item in
+                        if item.scoreCount == 0 {
+                            Text("-")
+                        } else {
+                            Text(item.scoreCount.formatted())
+                        }
+                    }
+                    .width(60)
+
+                    if showLastScoreDate {
+                        TableColumn("Last Score", value: \TableItem.lastScoreDateComparable) {
+                            item in
+                            if let lastScoreDate = item.lastScoreDate {
+                                Text(lastScoreDate.formatted(date: .numeric, time: .omitted))
+                            } else {
+                                Text("-")
+                            }
+                        }
+                    }
+                }
             }
-        }
-        .onChange(of: sortOrder) {
-            items.sort(using: sortOrder)
-        }
-        .toolbar {
-            Toggle(isOn: $playable) {
-                Image(systemName: "hand.thumbsup")
+            .onChange(of: sortOrder) {
+                items.sort(using: sortOrder)
             }
-            .help("show only playable games")
-            Button(action: nextVR) {
-                Image(systemName: vr.imageName)
+            .toolbar {
+                Toggle(isOn: $playable) {
+                    Image(systemName: "hand.thumbsup")
+                }
+                .help("show only playable games")
+
+                Button(action: nextVR) {
+                    Image(systemName: vr.imageName)
+                }
+                .help("cycle through types of VR games")
             }
-            .help("cycle through types of VR games")
-        }
-        .task {
-            if showLastScoreDate {
-                sortOrder = [KeyPathComparator(\TableItem.lastScoreDateComparable, order: .reverse)]
+            .task {
+                if showLastScoreDate {
+                    sortOrder = [
+                        KeyPathComparator(\TableItem.lastScoreDateComparable, order: .reverse)
+                    ]
+                }
             }
         }
     }

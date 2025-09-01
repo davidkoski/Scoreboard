@@ -360,7 +360,7 @@ struct Table: Identifiable, Comparable, Hashable, Codable {
 
     init(table: VPinStudio.TableListItem) {
         self.webId = table.webId
-        self.name = table.gameName
+        self.name = table.shortName
         self.longName = table.gameDisplayName
         self.cabinetId = table.cabinetId
         self.scoreType = table.highscoreType
@@ -389,7 +389,7 @@ struct Table: Identifiable, Comparable, Hashable, Codable {
             }
         }
 
-        update(\.name, \.gameName)
+        update(\.name, \.shortName)
         update(\.longName, \.gameDisplayName)
         update(\.webId, \.webId)
         update(\.disabled, \.disabled)
@@ -431,6 +431,14 @@ struct Table: Identifiable, Comparable, Hashable, Codable {
 
     static func < (lhs: Table, rhs: Table) -> Bool {
         lhs.sortKey < rhs.sortKey
+    }
+
+    public func matches(_ string: String) -> Bool {
+        let lc = string.lowercased()
+        return name.lowercased().contains(lc) || manufacturer.lowercased().contains(lc)
+            || firstAuthor.lowercased().contains(lc) || gameYear.description.contains(lc)
+            || gameThemes.contains { $0.lowercased().contains(lc) }
+            || designers.contains { $0.lowercased().contains(lc) }
     }
 }
 
