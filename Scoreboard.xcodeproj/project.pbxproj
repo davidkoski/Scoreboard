@@ -19,7 +19,7 @@
 		C36981432C1E4C2900B4A704 /* ScoreEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36981422C1E4C2900B4A704 /* ScoreEntry.swift */; };
 		C369D99C2E4086BB003191D1 /* Domain.swift in Sources */ = {isa = PBXBuildFile; fileRef = C369D99B2E4086BB003191D1 /* Domain.swift */; };
 		C39348052E63EC4300C216D1 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C39348042E63EC4300C216D1 /* CalendarView.swift */; };
-		C39348072E63EC4C00C216D1 /* TimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C39348062E63EC4C00C216D1 /* TimeView.swift */; };
+		C39348072E63EC4C00C216D1 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C39348062E63EC4C00C216D1 /* StatsView.swift */; };
 		C39348092E63EEED00C216D1 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = C39348082E63EEED00C216D1 /* AppIcon.icon */; };
 		C393480B2E63F6A800C216D1 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = C393480A2E63F6A800C216D1 /* Util.swift */; };
 		C3A4102E2C6EE33B00E47F63 /* VPinStudioScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3A4102D2C6EE33B00E47F63 /* VPinStudioScanner.swift */; };
@@ -61,7 +61,7 @@
 		C36981422C1E4C2900B4A704 /* ScoreEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreEntry.swift; sourceTree = "<group>"; };
 		C369D99B2E4086BB003191D1 /* Domain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Domain.swift; sourceTree = "<group>"; };
 		C39348042E63EC4300C216D1 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
-		C39348062E63EC4C00C216D1 /* TimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeView.swift; sourceTree = "<group>"; };
+		C39348062E63EC4C00C216D1 /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
 		C39348082E63EEED00C216D1 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		C393480A2E63F6A800C216D1 /* Util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 		C3A4102D2C6EE33B00E47F63 /* VPinStudioScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VPinStudioScanner.swift; sourceTree = "<group>"; };
@@ -141,7 +141,7 @@
 				C3D0AABE2C05593F00B8BD73 /* TableSearchView.swift */,
 				C3A410312C6EE89A00E47F63 /* DuplicatesView.swift */,
 				C39348042E63EC4300C216D1 /* CalendarView.swift */,
-				C39348062E63EC4C00C216D1 /* TimeView.swift */,
+				C39348062E63EC4C00C216D1 /* StatsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -356,7 +356,7 @@
 				C3CB07042CE9AC3600AD650F /* Duplicates.swift in Sources */,
 				C393480B2E63F6A800C216D1 /* Util.swift in Sources */,
 				C3A410302C6EE83C00E47F63 /* Configuration.swift in Sources */,
-				C39348072E63EC4C00C216D1 /* TimeView.swift in Sources */,
+				C39348072E63EC4C00C216D1 /* StatsView.swift in Sources */,
 				C3D0AAD62C056C6300B8BD73 /* CountedSet.swift in Sources */,
 				C3D0AABD2C05593F00B8BD73 /* ScoreboardApp.swift in Sources */,
 				C31424732C07F21900D34880 /* RecentScoresView.swift in Sources */,
@@ -547,7 +547,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Scoreboard/Preview Content\"";
-				DEVELOPMENT_TEAM = S7CJ5V73AM;
+				DEVELOPMENT_TEAM = BK98S9NKBE;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Scoreboard/Info.plist;
@@ -588,7 +588,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Scoreboard/Preview Content\"";
-				DEVELOPMENT_TEAM = S7CJ5V73AM;
+				DEVELOPMENT_TEAM = BK98S9NKBE;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Scoreboard/Info.plist;

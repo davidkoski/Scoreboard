@@ -27,17 +27,17 @@ struct ContentView: View {
         case recent
         case tables
         case calendar
-        case time
+        case stats
         case dups
 
         var id: String { rawValue }
 
         var systemImage: String {
             switch self {
-            case .recent: "numbers.rectangle"
+            case .recent: "clock"
             case .tables: "table.furniture"
             case .calendar: "calendar"
-            case .time: "clock"
+            case .stats: "sum"
             case .dups: "square.stack"
             }
         }
@@ -81,8 +81,8 @@ struct ContentView: View {
                         document: document, path: path, search: $search, items: $filteredItems)
                 case .calendar:
                     CalendarView(document: document, items: $filteredItems)
-                case .time:
-                    TimeView(document: document, items: $filteredItems)
+                case .stats:
+                    StatsView(document: document, items: $filteredItems)
                 case .dups:
                     DuplicatesView(document: $document)
                 }

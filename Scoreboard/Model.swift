@@ -454,7 +454,7 @@ struct Activity: Codable {
         static var zero = Self.init()
 
         init(_ activity: VPinStudio.Activity) {
-            self.lastPlayed = Day(activity.lastPlayed)
+            self.lastPlayed = activity.lastPlayed
             self.numberOfPlays = activity.numberOfPlays
             self.timePlayedSecs = Seconds(activity.timePlayedSecs)
         }

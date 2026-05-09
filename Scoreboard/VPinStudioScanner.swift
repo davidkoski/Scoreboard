@@ -89,9 +89,13 @@ struct VPinStudioScanner: View {
                 for table in document.contents.tables.values {
 
                     group.addTask {
-                        let details = try await client.getTablesDetail(cabinetId: table.cabinetId)
-
-                        return (table, details)
+                        if let details = try await client.getTablesDetail(
+                            cabinetId: table.cabinetId)
+                        {
+                            return (table, details)
+                        } else {
+                            return nil
+                        }
                     }
                 }
 

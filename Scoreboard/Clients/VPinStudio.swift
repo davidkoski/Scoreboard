@@ -188,7 +188,7 @@ public struct VPinStudio {
     }
 
     /**
-
+    
     ```json
      {
        "rom": "meteorb",
@@ -266,7 +266,7 @@ public struct VPinStudio {
        "resPath": "D:\\vpx\\vPinball\\visualpinball\\Tables\\Meteor (Stern 1979) Bord 1.0.0a VR.res"
      },
      ```
-
+    
      */
     public struct TableListItem: Decodable {
         /// unique identifier for table, e.g. sMBqx5fp.  This is the identifier from the ``PinballDB``
@@ -306,7 +306,9 @@ public struct VPinStudio {
 
             self.gameName = try container.decode(String.self, forKey: CodingKeys.gameName)
             self.gameDisplayName = try container.decode(String.self, forKey: .gameDisplayName)
-            self.webId = try container.decode(WebTableId.self, forKey: CodingKeys.id)
+            self.webId =
+                try container.decodeIfPresent(WebTableId.self, forKey: CodingKeys.id) ?? WebTableId(
+                    stringValue: "missing")!
             self.cabinetId = try container.decode(CabinetTableId.self, forKey: CodingKeys.popperId)
             self.highscoreType = try container.decodeIfPresent(
                 HighScoreType.self, forKey: .highscoreType)
@@ -326,9 +328,9 @@ public struct VPinStudio {
     }
 
     /**
-
+    
      http://pinbot.local:8089/api/v1/frontend/tabledetails/129
-
+    
     ```json
      {
        "sqlVersion": 64,
@@ -393,7 +395,7 @@ public struct VPinStudio {
        "popper15": true
      }
      ```
-
+    
      */
     public struct TableDetails: Decodable {
         let webGameId: WebTableId?
@@ -434,13 +436,21 @@ public struct VPinStudio {
         let (data, _) = try await localSession.data(for: request)
 
         return try JSONDecoder().decode([TableListItem].self, from: data)
+            .filter {
+                // discard any that don't have an assigned vps table
+                $0.webId.stringValue != "missing"
+            }
     }
 
-    public func getTablesDetail(cabinetId: CabinetTableId) async throws -> TableDetails {
+    public func getTablesDetail(cabinetId: CabinetTableId) async throws -> TableDetails? {
         let url = detailsURL.appendingPathComponent(cabinetId.stringValue)
         do {
             let request = URLRequest(url: url)
             let (data, _) = try await localSession.data(for: request)
+
+            if data.isEmpty {
+                return nil
+            }
 
             return try JSONDecoder().decode(TableDetails.self, from: data)
         } catch {
@@ -491,7 +501,8 @@ public struct VPinStudio {
          {
            "uniqueId": 1068,
            "gameId": 1326,
-           "lastPlayed": 1752896307367,
+           "lastPlayed": "2026-03-01",
+           "lastPlayed": "2026-04-13T03:31:42.567+00:00",
            "numberOfPlays": 2,
            "timePlayedSecs": 2266,
            "displayName": "City Hunter (Original 2025) Tombg 1.0.0 VR",
@@ -501,7 +512,7 @@ public struct VPinStudio {
          */
 
         let gameId: CabinetTableId
-        let lastPlayed: Date
+        let lastPlayed: Day
         let numberOfPlays: Int
         let timePlayedSecs: Int
     }
